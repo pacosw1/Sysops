@@ -1,3 +1,4 @@
+package globals
 
 //const command constants
 const (

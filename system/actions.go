@@ -1,6 +1,9 @@
 package system
 
-import "sysops/types"
+import (
+	"fmt"
+	"sysops/types"
+)
 
 //LoadProcess loads a proces unto memory
 func (m *MemoryManager) LoadProcess(p *types.Process) {
@@ -65,4 +68,21 @@ func (m *MemoryManager) FreePages(p *types.Process) {
 	//if no spaces avaliable, swap items based on LRU or FIFO
 	//do this until new program is inside memory
 
+}
+
+//PrintMessage prints message sent by input
+func PrintMessage(msg []string, action string) {
+	res := ""
+	for _, word := range msg {
+		res += word + " "
+	}
+
+	fmt.Println("INPUT: " + action)
+
+	if len(res) == 0 {
+		println("OUTPUT: Empty message \n\n")
+	} else {
+		fmt.Print("OUTPUT: " + res + "\n\n")
+		fmt.Println("")
+	}
 }

@@ -1,54 +1,39 @@
 package input
 
-
-package system
-
 import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"sysops/globals"
 )
 
-
-
-
-
-
-
 type Request struct {
-	Type string
-	Args []int
-	Message string
+	Type    string
+	Args    []int
+	Message []string
 }
-
-
-
-
-
-
 
 type InputReader struct {
-	RawData string
-	Path string
-	commandQ chan *Request
+	RawData  string
+	Path     string
+	CommandQ chan *Request
 }
-
 
 func NewReader() *InputReader {
 
 	return &InputReader{
-		Path: ""
-		RawData: "",
-		commandQ: make(chan *Request, 100),
+		Path:     "",
+		RawData:  "",
+		CommandQ: make(chan *Request, 100),
 	}
 }
 
-//Decode decodes commands 
-func  (r *InputReader) Decode(path string) {
+//Decode decodes commands
+func (r *InputReader) Decode() {
 
-	if (len(r.RawData) == 0) {
-		println("Data Empty");
+	if len(r.RawData) == 0 {
+		println("Data Empty")
 		return
 	}
 
@@ -63,60 +48,27 @@ func  (r *InputReader) Decode(path string) {
 		} else {
 
 			//validate commands
-			println(m.Validate(str))
+			ok, req := r.Validate(str)
+			if ok {
+				r.CommandQ <- req
+				// fmt.Println("Command Received: ", str)
+			} else {
+				fmt.Println("Invalid Command", str)
+			}
 
 		}
 	}
 
 }
 
-
-func  (r *InputReader) ReadFile(path string) {
+func (r *InputReader) ReadFile(path string) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		fmt.Println("File reading error", err)
 		return
 	}
 	stringData := string(data)
-	r.RawData = stringData;
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-//ReadFile reads text file with specified path
-func (m *MemoryManager) ReadFile(path string) {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		fmt.Println("File reading error", err)
-		return
-	}
-	stringData := string(data)
-
-	commands := strings.Split(stringData, "\n")
-
-	for _, command := range commands {
-
-		str := strings.Fields(command)
-
-		if len(str) == 0 {
-			println("Empty line....skipping")
-		} else {
-
-			println(m.Validate(str))
-
-		}
-	}
+	r.RawData = stringData
 
 }
 
@@ -131,38 +83,38 @@ func isNumber(arg string) (bool, int64) {
 }
 
 //Validate commands
-func (m *MemoryManager) Validate(command []string) bool, *Request  {
+func (r *InputReader) Validate(command []string) (bool, *Request) {
 	action := command[0]
 	switch action {
-	case Print:
+	case globals.Print:
 		req := &Request{
-			Type: "C",
-			Message: command[1], 
+			Type:    "C",
+			Message: command[1:],
 		}
 		return true, req
-	case LoadP: //todo
+	case globals.LoadP: //todo
 		//check for invalid commands
 		if len(command) > 3 || len(command) < 3 {
-			return false
+			return false, nil
 		}
 		//check that args are valid numbers
 		valid, size := isNumber(command[1])
 		validID, pID := isNumber(command[2])
 
 		if valid && validID {
-			if size <= maxSize {
+			if size <= globals.MaxSize {
 				req := &Request{
 					Type: "P",
-					Args: [int(size), int(pID)],
+					Args: []int{int(size), int(pID)},
 				}
 				return true, req
 			}
 		}
-		return false
-	case Access:
+		return false, nil
+	case globals.Access:
 		//invalid command params
 		if len(command) < 4 || len(command) > 4 {
-			return false
+			return false, nil
 		}
 
 		//check valid numbers
@@ -173,61 +125,44 @@ func (m *MemoryManager) Validate(command []string) bool, *Request  {
 		if validAddr && validProc && validMod {
 			//valid boolean value
 			if val > 1 || val < 0 {
-				return false
+				return false, nil
 			}
 			req := &Request{
 				Type: "A",
-				Args: [addr, proc, val],
+				Args: []int{int(addr), int(proc), int(val)},
 			}
 			return true, req
 		}
-		return false
+		return false, nil
 
-	case FreeP:
+	case globals.FreeP:
 		if len(command) > 2 {
-			return false
+			return false, nil
 		}
 		valid, num := isNumber((command[1]))
 		if !valid {
-			return false
+			return false, nil
 		}
 		req := &Request{
 			Type: "L",
-			Args: [int(num)],
+			Args: []int{int(num)},
 		}
 		return true, req
-	case Stats:
+	case globals.Stats:
 		if len(command) > 1 {
-			return false
+			return false, nil
 		}
 		return true, &Request{}
-	case End:
+	case globals.End:
 		if len(command) > 1 {
-			return false
+			return false, nil
 		}
 		req := &Request{
 			Type: "E",
-			Args: [],
 		}
 		return true, req
 	default:
 		fmt.Println("Command not recognized")
-		return false, &Request{}
-	}
-}
-
-func printMessage(msg []string, action string) {
-	res := ""
-	for _, word := range msg {
-		res += word + " "
-	}
-
-	fmt.Println("INPUT: " + action)
-
-	if len(res) == 0 {
-		println("OUTPUT: Empty message \n\n")
-	} else {
-		fmt.Print("OUTPUT: " + res + "\n\n")
-		fmt.Println("")
+		return false, nil
 	}
 }

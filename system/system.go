@@ -1,6 +1,9 @@
 package system
 
 import (
+	"fmt"
+	"sysops/globals"
+	"sysops/input"
 	"sysops/types"
 	"sysops/virtual"
 )
@@ -9,6 +12,7 @@ import (
 type MemoryManager struct {
 	PageSize     int
 	Running      bool
+	Reader       *input.InputReader
 	PhysicalMem  *virtual.Storage
 	SwapMemory   *virtual.Storage
 	ProcessList  []*types.Process
@@ -19,12 +23,70 @@ type MemoryManager struct {
 //New creates a new Memory Manager
 func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 	return &MemoryManager{
-		Running:      false,
-		PageSize:     pagesize,
-		PhysicalMem:  virtual.NewStorage(physicalSize, pagesize),
-		SwapMemory:   virtual.NewStorage(swapSize, pagesize),
-		CommandQueue: make(chan string, 1000),
-		ProcessList:  make([]*types.Process, 0),
-		TimeStep:     0,
+		Running:     false,
+		PageSize:    pagesize,
+		Reader:      input.NewReader(),
+		PhysicalMem: virtual.NewStorage(physicalSize, pagesize),
+		SwapMemory:  virtual.NewStorage(swapSize, pagesize),
+		ProcessList: make([]*types.Process, 0),
+		TimeStep:    0,
 	}
+}
+
+//Start starts processing inputs from queue when avaliable
+func (m *MemoryManager) Start() {
+	m.Running = true
+	m.processInputs()
+
+}
+
+func (m *MemoryManager) handleInput(r *input.Request) {
+
+	println("processing input")
+	switch r.Type {
+	case globals.Access:
+		break
+	case globals.LoadP: //handles loading a new process
+		size := r.Args[0]
+		pID := r.Args[1]
+		m.LoadProcess(types.NewProcess(pID, size, m.PageSize))
+		break
+	case globals.Print: //handles printing a message
+		PrintMessage(r.Message, globals.Print)
+		break
+	case globals.FreeP: //handles freeing process vars
+		break
+	case globals.Stats:
+		m.Pause()
+		//display stats
+		m.Resume()
+		break
+	case globals.End:
+		m.Pause()
+		m.PhysicalMem.View()
+		break
+	default:
+		fmt.Println("Command could not be read ")
+
+	}
+}
+
+func (m *MemoryManager) processInputs() {
+	for m.Running {
+		//receive a request from the queue
+		req := <-m.Reader.CommandQ
+		m.handleInput(req)
+	}
+}
+
+//Pause pauses input processing
+func (m *MemoryManager) Pause() {
+	m.Running = false
+}
+
+//Resume resumes processing inputs
+func (m *MemoryManager) Resume() {
+	m.Running = true
+	m.processInputs()
+
 }
