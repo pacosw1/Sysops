@@ -1,14 +1,13 @@
 package main
 
 import (
-	"sysops/globals"
-	"sysops/system"
+	"sysops/replacement"
 	"sysops/types"
 )
 
 func main() {
 
-	pageSize := 4 //bytes
+	// pageSize := 4 //bytes
 
 	// mem := types.NewProcess(420, 9, 4)
 
@@ -21,18 +20,39 @@ func main() {
 
 	// //manage system
 
-	manager := system.New(globals.MaxSize, 100, pageSize)
+	// manager := system.New(globals.MaxSize, 100, pageSize)
 
-	p1 := types.NewProcess(1, 32, pageSize)
-	p2 := types.NewProcess(2, 5, pageSize)
-	p3 := types.NewProcess(3, 20, pageSize)
+	// p1 := types.NewProcess(1, 32, pageSize)
+	// p2 := types.NewProcess(2, 5, pageSize)
+	// p3 := types.NewProcess(3, 20, pageSize)
 
-	// // fmt.Println(len(p1.Pages))
-	manager.LoadProcess(p1)
-	manager.LoadProcess(p2)
-	manager.LoadProcess(p3)
+	// // // fmt.Println(len(p1.Pages))
+	// manager.LoadProcess(p1)
+	// manager.LoadProcess(p2)
+	// manager.LoadProcess(p3)
 
-	manager.PhysicalMem.View()
+	// manager.PhysicalMem.View()
+
+	lru := replacement.NewLRU()
+
+	p1 := types.NewPage(1, 420)
+	p2 := types.NewPage(2, 69)
+	p3 := types.NewPage(3, 52)
+
+	lru.Push(p1)
+	lru.Push(p2)
+	lru.Push(p3)
+
+	lru.Push(p1)
+
+	lru.Pop()
+
+	lru.Print()
+
+	// println(len(lru.Hash))
+
+	//debe de quedar  p1 p2 p3
+	// 						^ mas viejo
 
 	// manager.Reader.ReadFile("files/test.txt")
 	// manager.Reader.Decode()

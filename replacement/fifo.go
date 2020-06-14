@@ -43,4 +43,5 @@ func (f *FIFO) Remove() *types.Page {
 	last, _ := f.OrderList.Back().Value.(*types.Page)
 	f.OrderList.Remove(f.OrderList.Back())
 	return last
+
 }
