@@ -19,6 +19,10 @@ func (m *MemoryManager) FreePages(p *types.Process) {
 	//if it does exist
 	pageTable := process.Pages
 
+	//keep track of available frames in each memory
+	physicalSpaceTracker := m.PhysicalMem.SpaceTracker
+	swapSpaceTracker := m.SwapMemory.SpaceTracker
+
 	//loop over page table
 	for _, page := range pageTable {
 
@@ -26,35 +30,18 @@ func (m *MemoryManager) FreePages(p *types.Process) {
 		fmt.Printf("PID %d page# %d is in main memory, deleting...\n", page.PID, page.ID)
 		if page.PageFrame != -1 {
 			//free up memory
-			temp := m.PhysicalMem.Memory[page.PageFrame]
 			m.PhysicalMem.Memory[page.PageFrame] = nil
+			physicalSpaceTracker.Remove(page.PageFrame)
 
 			//delete index from FreePages list
-			dummy := m.SwapMemory.FreePages.Front()
-			for dummy != nil {
-				if dummy.Value == temp.PageFrame {
-					m.SwapMemory.FreePages.Remove(dummy)
-					break
-				}
-				dummy = dummy.Next()
-			}
 
 		} else { //else it's in swap memory
 			fmt.Printf("PID %d page# %d is in swap memory, deleting...\n", page.PID, page.ID)
 
-			temp := m.SwapMemory.Memory[page.SwapAddr]
 			m.SwapMemory.Memory[page.SwapAddr] = nil
-
-			dummy := m.SwapMemory.FreePages.Front()
-
+			swapSpaceTracker.Remove(page.SwapAddr)
 			//delete index from FreePages list
-			for dummy != nil {
-				if dummy.Value == temp.SwapAddr {
-					m.SwapMemory.FreePages.Remove(dummy)
-					break
-				}
-				dummy = dummy.Next()
-			}
+
 			fmt.Printf("PID %d page# %d successfully deleted\n", page.PID, page.ID)
 		}
 	}

@@ -1,26 +1,25 @@
 package virtual
 
 import (
-	"container/list"
 	"fmt"
 	"sysops/types"
 )
 
 //Storage simulates real space in computer
 type Storage struct {
-	Memory    map[int]*types.Page //memory with physical pages
-	Size      int                 //size of the structure
-	PageSize  int                 //page size for memory
-	FreePages *list.List          //list with free page numbers
+	Memory       map[int]*types.Page //memory with physical pages
+	Size         int                 //size of the structure
+	PageSize     int                 //page size for memory
+	SpaceTracker *SpaceTracker
 }
 
 //NewStorage initializes memory to specified size
 func NewStorage(size, pagesize int) *Storage {
 	s := &Storage{
-		PageSize:  pagesize,
-		Memory:    make(map[int]*types.Page, 0),
-		Size:      size,
-		FreePages: list.New(),
+		PageSize:     pagesize,
+		Memory:       make(map[int]*types.Page, 0),
+		Size:         size,
+		SpaceTracker: NewSpaceTracker(),
 	}
 	s.init()
 	return s
@@ -52,6 +51,6 @@ func (s *Storage) init() {
 	//all frames are free
 	for page := 0; page < pages; page++ {
 		s.Memory[page] = nil
-		s.FreePages.PushBack(page)
+		s.SpaceTracker.Add(page)
 	}
 }

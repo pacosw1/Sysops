@@ -22,6 +22,11 @@ func NewProcess(id, size, pageSize int) *Process {
 	return p
 }
 
+//GetInfo gets Virtual page and offset for specified virtual address
+func (p *Process) GetInfo(vAddr int) *Info {
+	return p.Memory[vAddr]
+}
+
 //Init initializes virtual memory and Page Table
 func (p *Process) Init() {
 	pagNum := 0

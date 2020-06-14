@@ -23,18 +23,18 @@ func main() {
 
 	manager := system.New(globals.MaxSize, 100, pageSize)
 
-	// p1 := types.NewProcess(1, 32, pageSize)
-	p2 := types.NewProcess(2, 5, pageSize)
-	p3 := types.NewProcess(3, 50, pageSize)
+	p1 := types.NewProcess(1, 50, pageSize)
+	// p2 := types.NewProcess(2, 5, pageSize)
+	// p3 := types.NewProcess(3, 50, pageSize)
 
-	// // // fmt.Println(len(p1.Pages))
-	// manager.LoadProcess(p1)
+	// // // // fmt.Println(len(p1.Pages))
+	manager.LoadProcess(p1)
+	// // manager.LoadProcess(p2)
+	// manager.LoadProcess(p3)
 	// manager.LoadProcess(p2)
-	manager.LoadProcess(p3)
-	manager.LoadProcess(p2)
-	manager.FreePages(p3)
+	// manager.FreePages(p3)
 
-	manager.SwapMemory.View()
+	manager.PhysicalMem.View()
 
 	// for _, page := range p3.Pages {
 
