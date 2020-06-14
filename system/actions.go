@@ -55,6 +55,11 @@ func (m *MemoryManager) LoadProcess(p *types.Process) {
 
 }
 
+//AccessMemory access or modify bits inside pages
+func (m *MemoryManager) AccessMemory(p *types.Process) {
+
+}
+
 //FreePages loads a proces unto memory
 func (m *MemoryManager) FreePages(p *types.Process) {
 

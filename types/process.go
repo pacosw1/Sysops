@@ -2,32 +2,44 @@ package types
 
 //Process struct
 type Process struct {
-	pID      int
+	PID      int           //Process ID number
 	Size     int           //size of process in bytes
 	Pages    map[int]*Page //table for pages in process
-	PageSize int
+	Memory   []*Info       //Virtual Memory for process
+	PageSize int           //Page size
 }
 
-//NewProcess create new Process
+//NewProcess initializes new Process object
 func NewProcess(id, size, pageSize int) *Process {
 	p := &Process{
-		pID:      id,
+		PID:      id,
 		Size:     size,
 		PageSize: pageSize,
 		Pages:    make(map[int]*Page, 0),
+		Memory:   make([]*Info, size),
 	}
-	p.Init()
+	p.Init() //run unit before returning
 	return p
 }
 
-//Init Process Page Table
+//Init initializes virtual memory and Page Table
 func (p *Process) Init() {
-	pages := p.Size / p.PageSize
-	//handle case for leftover values
-	if p.Size%p.PageSize != 0 {
-		pages++
+	pagNum := 0
+	for bit := 0; bit < p.Size; bit++ {
+
+		//calculates offset based on virtual adress and page size
+		offset := bit % p.PageSize
+		//save Info struct for each bit P, D to speed up calculations
+		p.Memory[bit] = &Info{
+			Offset: offset,
+			Page:   pagNum,
+		}
+		//increase page size
+		if ((bit + 1) % p.PageSize) == 0 {
+			p.Pages[pagNum] = NewPage(p.PID, pagNum) //initialized new page
+			pagNum++
+
+		}
 	}
-	for i := 0; i < pages; i++ {
-		p.Pages[i] = NewPage(p.pID, i)
-	}
+
 }

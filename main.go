@@ -1,17 +1,26 @@
 package main
 
 import (
-	"sysops/system"
+	"fmt"
+	"sysops/types"
 )
 
 func main() {
 
-	pageSize := 16 //bytes
-	//manage system
-	manager := system.New(200, 3000, pageSize)
+	// pageSize := 16 //bytes
 
-	manager.Reader.ReadFile("files/test.txt")
-	manager.Reader.Decode()
+	mem := types.NewProcess(420, 13, 4)
+
+	for i := 0; i < mem.Size; i++ {
+		bit := mem.Memory[i]
+		fmt.Printf("Virtual Address: %d  Virtual Page: %d  Offset: %d  \n\n", i, bit.Page, bit.Offset)
+	}
+
+	//manage system
+	// manager := system.New(2049, 3000, pageSize)
+
+	// manager.Reader.ReadFile("files/test.txt")
+	// manager.Reader.Decode()
 
 	// list := manager.PhysicalMem.FreePages.Front()
 
@@ -23,9 +32,9 @@ func main() {
 	// 	fmt.Println(list.Value)
 	// 	list = list.Next()
 	// }
-	manager.Start()
+	// manager.Start()
 
-	println("TimeStep: ", manager.TimeStep)
+	// println("TimeStep: ", manager.TimeStep)
 	// fmt.Println(p.Pages[0])
 
 }

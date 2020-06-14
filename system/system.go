@@ -12,10 +12,10 @@ import (
 type MemoryManager struct {
 	PageSize     int
 	Running      bool
-	Reader       *input.InputReader
-	PhysicalMem  *virtual.Storage
-	SwapMemory   *virtual.Storage
-	ProcessList  []*types.Process
+	Reader       *input.Reader
+	PhysicalMem  *virtual.Storage //physical mem
+	SwapMemory   *virtual.Storage //swap mem
+	ProcessList  []*types.Process //list of process objects
 	CommandQueue chan string
 	TimeStep     int
 }
@@ -40,7 +40,8 @@ func (m *MemoryManager) Start() {
 
 }
 
-func (m *MemoryManager) handleInput(r *input.Request) {
+//handleInput handles input received from reader and executes them
+func (m *MemoryManager) handleInput(r *types.Request) {
 
 	println("processing input")
 	switch r.Type {
@@ -88,5 +89,4 @@ func (m *MemoryManager) Pause() {
 func (m *MemoryManager) Resume() {
 	m.Running = true
 	m.processInputs()
-
 }
