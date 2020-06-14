@@ -14,9 +14,9 @@ type MemoryManager struct {
 	PageSize     int
 	Running      bool
 	Reader       *reader.Reader
-	PhysicalMem  *virtual.Storage //physical mem
-	SwapMemory   *virtual.Storage //swap mem
-	ProcessList  []*types.Process //list of process objects
+	PhysicalMem  *virtual.Storage       //physical mem
+	SwapMemory   *virtual.Storage       //swap mem
+	ProcessList  map[int]*types.Process //list of process objects
 	ReplacementQ *replacement.FIFO
 	CommandQueue chan string
 	TimeStep     int
@@ -31,7 +31,7 @@ func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 		PhysicalMem:  virtual.NewStorage(physicalSize, pagesize),
 		SwapMemory:   virtual.NewStorage(swapSize, pagesize),
 		ReplacementQ: replacement.NewFIFO(),
-		ProcessList:  make([]*types.Process, 0),
+		ProcessList:  make(map[int]*types.Process, 0),
 		TimeStep:     0,
 	}
 }

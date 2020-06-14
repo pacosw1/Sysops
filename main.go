@@ -1,13 +1,14 @@
 package main
 
 import (
-	"sysops/replacement"
+	"sysops/globals"
+	"sysops/system"
 	"sysops/types"
 )
 
 func main() {
 
-	// pageSize := 4 //bytes
+	pageSize := 4 //bytes
 
 	// mem := types.NewProcess(420, 9, 4)
 
@@ -20,34 +21,46 @@ func main() {
 
 	// //manage system
 
-	// manager := system.New(globals.MaxSize, 100, pageSize)
+	manager := system.New(globals.MaxSize, 100, pageSize)
 
 	// p1 := types.NewProcess(1, 32, pageSize)
-	// p2 := types.NewProcess(2, 5, pageSize)
-	// p3 := types.NewProcess(3, 20, pageSize)
+	p2 := types.NewProcess(2, 5, pageSize)
+	p3 := types.NewProcess(3, 50, pageSize)
 
 	// // // fmt.Println(len(p1.Pages))
 	// manager.LoadProcess(p1)
+	// manager.LoadProcess(p2)
+	manager.LoadProcess(p3)
+	manager.LoadProcess(p2)
+	manager.FreePages(p3)
+
+	manager.SwapMemory.View()
+
+	// for _, page := range p3.Pages {
+
+	// 	fmt.Printf("PID: %d ID: %d pageFrame: %d swampAddr: %d \n ", page.PID, page.ID, page.PageFrame, page.SwapAddr)
+	// }
+	// manager.FreePages(p1)
 	// manager.LoadProcess(p2)
 	// manager.LoadProcess(p3)
 
 	// manager.PhysicalMem.View()
 
-	lru := replacement.NewLRU()
+	// lru := replacement.NewLRU()
 
-	p1 := types.NewPage(1, 420)
-	p2 := types.NewPage(2, 69)
-	p3 := types.NewPage(3, 52)
+	// p1 := types.NewPage(1, 420)
+	// p2 := types.NewPage(2, 69)
+	// p3 := types.NewPage(3, 52)
 
-	lru.Push(p1)
-	lru.Push(p2)
-	lru.Push(p3)
+	// lru.Push(p1)
+	// lru.Push(p2)
+	// lru.Push(p3)
 
-	lru.Push(p1)
+	// lru.Push(p1)
 
-	lru.Pop()
+	// lru.Pop()
 
-	lru.Print()
+	// lru.Print()
 
 	// println(len(lru.Hash))
 
