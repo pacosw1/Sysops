@@ -8,7 +8,7 @@ type Request struct {
 }
 
 //NewRequest Initializes a new Request
-func NewRequest(commandType string, args []int, message []string) {
+func NewRequest(commandType string, args []int, message []string) *Request {
 	return &Request{
 		Type:    commandType,
 		Args:    args,

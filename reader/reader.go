@@ -1,12 +1,11 @@
-package input
+package reader
 
 import (
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"strings"
-	"sysops/globals"
 	"sysops/types"
+	"sysops/validation"
 )
 
 //Reader reads input from a specified file and stores it as a string
@@ -20,7 +19,7 @@ type Reader struct {
 func NewReader() *Reader {
 
 	return &Reader{
-		Path:     "",  //file path to be read
+		Path:     "", //file path to be read
 		RawData:  "", //buffer to store read input as a string
 		CommandQ: make(chan *types.Request, 100),
 	}
@@ -45,7 +44,7 @@ func (r *Reader) Decode() {
 		} else {
 
 			//validate commands
-			ok, req := r.Validate(str)
+			ok, req := validation.Validate(str)
 			if ok {
 				r.CommandQ <- req
 				// fmt.Println("Command Received: ", str)
@@ -69,4 +68,3 @@ func (r *Reader) ReadFile(path string) {
 	r.RawData = stringData
 
 }
-

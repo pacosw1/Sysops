@@ -1,23 +1,38 @@
 package main
 
 import (
-	"fmt"
+	"sysops/globals"
+	"sysops/system"
 	"sysops/types"
 )
 
 func main() {
 
-	// pageSize := 16 //bytes
+	pageSize := 4 //bytes
 
-	mem := types.NewProcess(420, 13, 4)
+	// mem := types.NewProcess(420, 9, 4)
 
-	for i := 0; i < mem.Size; i++ {
-		bit := mem.Memory[i]
-		fmt.Printf("Virtual Address: %d  Virtual Page: %d  Offset: %d  \n\n", i, bit.Page, bit.Offset)
-	}
+	// println(len(mem.Pages))
 
-	//manage system
-	// manager := system.New(2049, 3000, pageSize)
+	// for i := 0; i < mem.Size; i++ {
+	// 	bit := mem.Memory[i]
+	// 	fmt.Printf("Virtual Address: %d  Virtual Page: %d  Offset: %d  \n\n", i, bit.Page, bit.Offset)
+	// }
+
+	// //manage system
+
+	manager := system.New(globals.MaxSize, 100, pageSize)
+
+	p1 := types.NewProcess(1, 32, pageSize)
+	p2 := types.NewProcess(2, 5, pageSize)
+	p3 := types.NewProcess(3, 20, pageSize)
+
+	// // fmt.Println(len(p1.Pages))
+	manager.LoadProcess(p1)
+	manager.LoadProcess(p2)
+	manager.LoadProcess(p3)
+
+	manager.PhysicalMem.View()
 
 	// manager.Reader.ReadFile("files/test.txt")
 	// manager.Reader.Decode()

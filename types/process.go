@@ -25,6 +25,10 @@ func NewProcess(id, size, pageSize int) *Process {
 //Init initializes virtual memory and Page Table
 func (p *Process) Init() {
 	pagNum := 0
+
+	//init page 0
+	p.Pages[0] = NewPage(p.PID, pagNum)
+
 	for bit := 0; bit < p.Size; bit++ {
 
 		//calculates offset based on virtual adress and page size
@@ -35,9 +39,9 @@ func (p *Process) Init() {
 			Page:   pagNum,
 		}
 		//increase page size
-		if ((bit + 1) % p.PageSize) == 0 {
-			p.Pages[pagNum] = NewPage(p.PID, pagNum) //initialized new page
+		if ((bit)%p.PageSize) == 0 && bit != 0 {
 			pagNum++
+			p.Pages[pagNum] = NewPage(p.PID, pagNum) //initialized new page
 
 		}
 	}

@@ -3,7 +3,8 @@ package system
 import (
 	"fmt"
 	"sysops/globals"
-	"sysops/input"
+	"sysops/reader"
+	"sysops/replacement"
 	"sysops/types"
 	"sysops/virtual"
 )
@@ -12,10 +13,11 @@ import (
 type MemoryManager struct {
 	PageSize     int
 	Running      bool
-	Reader       *input.Reader
+	Reader       *reader.Reader
 	PhysicalMem  *virtual.Storage //physical mem
 	SwapMemory   *virtual.Storage //swap mem
 	ProcessList  []*types.Process //list of process objects
+	ReplacementQ *replacement.FIFO
 	CommandQueue chan string
 	TimeStep     int
 }
@@ -23,13 +25,14 @@ type MemoryManager struct {
 //New creates a new Memory Manager
 func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 	return &MemoryManager{
-		Running:     false,
-		PageSize:    pagesize,
-		Reader:      input.NewReader(),
-		PhysicalMem: virtual.NewStorage(physicalSize, pagesize),
-		SwapMemory:  virtual.NewStorage(swapSize, pagesize),
-		ProcessList: make([]*types.Process, 0),
-		TimeStep:    0,
+		Running:      false,
+		PageSize:     pagesize,
+		Reader:       reader.NewReader(),
+		PhysicalMem:  virtual.NewStorage(physicalSize, pagesize),
+		SwapMemory:   virtual.NewStorage(swapSize, pagesize),
+		ReplacementQ: replacement.NewFIFO(),
+		ProcessList:  make([]*types.Process, 0),
+		TimeStep:     0,
 	}
 }
 
