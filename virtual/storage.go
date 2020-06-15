@@ -41,12 +41,9 @@ func (s *Storage) View() {
 
 func (s *Storage) init() {
 	//determine frames in memory
-	pages := s.Size / s.PageSize
 
-	//add one extra frame if size cant be fit evenly
-	if s.Size%s.PageSize != 0 {
-		pages++
-	}
+	//wastes some bytes if division is uneven. All pages must be equal sized
+	pages := s.Size / s.PageSize
 
 	//all frames are free
 	for page := 0; page < pages; page++ {

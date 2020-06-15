@@ -2,134 +2,146 @@ package system
 
 import (
 	"fmt"
+	"sysops/globals"
 	"sysops/types"
 )
 
-func (m *MemoryManager) InsertPage(page *types.Page) {
+//InsertPage inserts a single page to Physicalory
+func (m *MemoryManager) InsertPage(page *types.Page) *types.Page {
+
+	// replaceQ := m.ReplacementQ
+	spaceTracker := m.Physical.SpaceTracker
+	realMem := m.Physical.Memory
+
+	//swap one frame to make space for new one
+	if spaceTracker.Empty() {
+		m.SwapPage()
+	}
+
+	//if space in physical memory
+	if !spaceTracker.Empty() {
+
+		availableFrame := spaceTracker.Pop()
+		// fmt.Printf("Inserting page at frame %d \n", availableFrame)
+		//update page
+		page.PageFrame = availableFrame
+		page.SwapFrame = -1
+
+		// fmt.Println(availableFrame)
+		//insert it to memory
+		realMem[availableFrame] = page
+		//add new page to replacement q
+		m.ReplacementQ.Add(page)
+
+	} else { //swap was full too
+		fmt.Println("no space in memory")
+	}
+	return page
 
 }
 
-func (m *MemoryManager) SwapPage(page *types.Page) {
+//SwapPage swaps a single page to swap memory
+func (m *MemoryManager) SwapPage() {
 
-	//if page already in swap, return
-	if !page.InMem {
+	//if nothing to replace return
+	if m.ReplacementQ.Empty() {
+		fmt.Println("No page to replace, empty memory")
 		return
 	}
 
-	//if page in physical memory swap it
+	page := m.ReplacementQ.Remove() //get oldest value to be replaced
+
+	//keep track of free spaces in swap and real mem
+	spaceTracker := m.Physical.SpaceTracker
+	swapSpaceTracker := m.Swap.SpaceTracker
+
+	//reference memories
+	realMem := m.Physical.Memory
+	swapMem := m.Swap.Memory
+
+	//add it to free page list
+	spaceTracker.Add(page.PageFrame) //add released frame to free frames
+
+	realMem[page.PageFrame] = nil            //free page from real memory
+	availableFrame := swapSpaceTracker.Pop() //update free frames
+
+	//update page info
+	page.PageFrame = -1
+	page.SwapFrame = availableFrame
+
+	//store it in swap
+	swapMem[availableFrame] = page
 
 }
 
 //LoadProcess loads a proces into memory
 func (m *MemoryManager) LoadProcess(p *types.Process) {
 
-	realMem := m.PhysicalMem.Memory
+	spaceTracker := m.Physical.SpaceTracker //keep track of free spaces
 
-	spaceTracker := m.PhysicalMem.SpaceTracker
 	//add to our list of processes
 	m.ProcessList[p.PID] = p
 	pages := len(p.Pages)
 
 	//if not enough space, swap based on selected algo
 	if pages > spaceTracker.Size() {
-		//FIFO
 
-		fmt.Println("\n Time to Swap \n ")
-		//amount of pages to be freed
-		dif := pages - spaceTracker.Size()
-		fmt.Printf("Replacing %d pages \n", dif)
+		dif := pages - spaceTracker.Size() // amount of free pages needed
 
-		//swap old pages to make space for new pages
-		for i := 0; i < dif; i++ {
+		for i := 0; i < dif; i++ { //swap old pages to make space for new pages
 
-			swapSpaceTracker := m.SwapMemory.SpaceTracker
+			swapSpaceTracker := m.Swap.SpaceTracker //keep track of swap frames
 
-			//get next page to be swapped in replacement algo
-			oldestPage := m.ReplacementQ.Remove()
-			fmt.Printf("Removing oldest Page with num %d and PID: %d \n\n", oldestPage.ID, oldestPage.PID)
-
-			//if we have free space inside Swap
-			if !swapSpaceTracker.Empty() {
-
-				//get the next free slot in the list
-				avaliableFrame := swapSpaceTracker.Pop()
-
-				//free up space in physical memory and update FreePages list
-				m.PhysicalMem.Memory[oldestPage.PageFrame] = nil
-				swapSpaceTracker.Add(oldestPage.PageFrame)
-
-				//update page details
-				oldestPage.InMem = false
-				oldestPage.PageFrame = -1
-				oldestPage.SwapAddr = avaliableFrame
-
-				//save page inside Swap
-				m.SwapMemory.Memory[avaliableFrame] = oldestPage
-
-				//update Swap Free Pages
-
+			if !swapSpaceTracker.Empty() { //if we have free space inside Swap, swap oldest page
+				m.SwapPage()
 			} else {
-				//to do, if swapMemory full do something
+				//to do, if Swap full do something
 			}
 
 		}
 
-		//add remaining pages to physical memory
-
-		for i := 0; i < pages; i++ {
+		for i := 0; i < pages; i++ { //add remaining pages to physical memory
 
 			//loading a page initially takes 1 second
 			m.TimeStep++
-
-			//get a free frame from physicalMemory
-			avaliableFrame := spaceTracker.Pop()
-
-			//update page in table
 			page := p.Pages[i]
-
-			page.InMem = true
-			page.SwapAddr = -1
-			page.InsertedAt = m.TimeStep
-			page.PageFrame = avaliableFrame
-
-			//insert page to memory, for locating purposes
-			realMem[avaliableFrame] = page
-
-			//add page to our replacement algorithm
-			m.ReplacementQ.Add(page)
+			m.InsertPage(page)
 
 		}
-
-		//LRU
 	} else { //there is enough space to add pages
 
 		//add all pages to physical memory
 		for i := 0; i < pages; i++ {
-
 			//loading a page initially takes 1 second
 			m.TimeStep++
-
-			//type assertion
-			avaliableFrame := spaceTracker.Pop()
-
-			//update page in table
 			page := p.Pages[i]
+			m.InsertPage(page)
 
-			page.InMem = true
-			page.InsertedAt = m.TimeStep
-			page.PageFrame = avaliableFrame
-
-			//insert page to memory, for locating purposes
-			realMem[avaliableFrame] = page
-
-			//add page to our replacement algorithm
-			m.ReplacementQ.Add(page)
 		}
 	}
-	//look for spaces in physical memory
-	//fill in process pages in free slots and update Page table
+}
 
-	//if no spaces avaliable, swap items based on LRU or FIFO
-	//do this until new program is inside memory
+func validSize(size int) bool {
 
+	return size <= globals.MaxSize
+
+}
+
+//FreePages loads a proces unto memory
+
+//PrintMessage prints message sent by input
+func PrintMessage(msg []string, action string) {
+	res := ""
+	for _, word := range msg {
+		res += word + " "
+	}
+
+	fmt.Println("INPUT: " + action)
+
+	if len(res) == 0 {
+		println("OUTPUT: Empty message \n\n")
+	} else {
+		fmt.Print("OUTPUT: " + res + "\n\n")
+		fmt.Println("")
+	}
 }

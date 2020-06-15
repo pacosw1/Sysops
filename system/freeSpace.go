@@ -5,8 +5,8 @@ import (
 	"sysops/types"
 )
 
-//FreePages frees all pages
-func (m *MemoryManager) FreePages(p *types.Process) {
+//FreeProcess frees all pages from a specific process
+func (m *MemoryManager) FreeProcess(p *types.Process) {
 
 	process := m.ProcessList[p.PID]
 
@@ -19,31 +19,28 @@ func (m *MemoryManager) FreePages(p *types.Process) {
 	//if it does exist
 	pageTable := process.Pages
 
-	//keep track of available frames in each memory
-	physicalSpaceTracker := m.PhysicalMem.SpaceTracker
-	swapSpaceTracker := m.SwapMemory.SpaceTracker
-
 	//loop over page table
 	for _, page := range pageTable {
-
-		//if page in physical memory
-		fmt.Printf("PID %d page# %d is in main memory, deleting...\n", page.PID, page.ID)
-		if page.PageFrame != -1 {
-			//free up memory
-			m.PhysicalMem.Memory[page.PageFrame] = nil
-			physicalSpaceTracker.Remove(page.PageFrame)
-
-			//delete index from FreePages list
-
-		} else { //else it's in swap memory
-			fmt.Printf("PID %d page# %d is in swap memory, deleting...\n", page.PID, page.ID)
-
-			m.SwapMemory.Memory[page.SwapAddr] = nil
-			swapSpaceTracker.Remove(page.SwapAddr)
-			//delete index from FreePages list
-
-			fmt.Printf("PID %d page# %d successfully deleted\n", page.PID, page.ID)
-		}
+		m.FreePage(page)
 	}
 
+}
+
+//FreePage frees a page from memory
+func (m *MemoryManager) FreePage(p *types.Page) {
+
+	if p.PageFrame >= 0 {
+		pageFrame := p.PageFrame
+		m.Physical.SpaceTracker.Add(pageFrame)
+		m.Physical.Memory[pageFrame] = nil
+		//update page just in case
+		p.PageFrame = -1
+		p.SwapFrame = -1
+	} else {
+		swapFrame := p.SwapFrame
+		m.Swap.SpaceTracker.Add(swapFrame)
+		m.Swap.Memory[swapFrame] = nil
+		p.PageFrame = -1
+		p.SwapFrame = -1
+	}
 }

@@ -14,5 +14,7 @@
     "css.validate": false,
     "scss.validate": false,
     "less.validate": false,
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "extensions.ignoreRecommendations": true
+    "extensions.ignoreRecommendations": true
 }

@@ -1,39 +1,40 @@
 package system
 
-// import (
-// 	"fmt"
-// 	"sysops/types"
-// )
+import (
+	"fmt"
+	"sysops/types"
+)
 
-// //AccessMemory access or modify bits inside pages
-// func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
-// 	//bit info
+func getRealAddr(realPage, pageSize, offset int) int {
+	return (realPage * pageSize) + offset
+}
 
-// 	//6
+//AccessMemory access or modify bits inside pages
+func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
 
-// 	//validation
-// 	if p.Size < vAddr {
+	//validation bit overflow
+	if vAddr >= p.Size {
+		return
+	}
 
-// 		info := p.GetInfo(vAddr)
-// 		page := p.Pages[info.Page]
+	//get offset and virtual page for bit
+	info := p.GetInfo(vAddr)
+	page := p.Pages[info.Page]
 
-// 		//esta en memoria real
-// 		if page.PageFrame >= 0 {
+	//if bit in real memory
+	if page.SwapFrame >= 0 { //esta en el swap
+		fmt.Printf("position in swap %d \n ", page.SwapFrame)
+		mm.FreePage(page)
+		mm.InsertPage(page)
 
-// 		} else { //esta en el swap
-// 			fmt.Printf("position in swap %d \n ", page.SwapAddr)
+	}
 
-// 		}
+	if m == 1 {
+		page.Mod = true
+		//Actualizar LRU
+	}
 
-// 		if m == 0 {
-// 			physicalAddress := info.Page*mm.PageSize + info.Offset
-// 			fmt.Printf("physical address %d \n ", physicalAddress)
+	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
+	fmt.Printf("realAddr: %d \n ", physicalAddress)
 
-// 		} else {
-
-// 			page.Mod = true
-
-// 		}
-// 	}
-
-// }
+}

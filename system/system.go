@@ -14,8 +14,8 @@ type MemoryManager struct {
 	PageSize     int
 	Running      bool
 	Reader       *reader.Reader
-	PhysicalMem  *virtual.Storage       //physical mem
-	SwapMemory   *virtual.Storage       //swap mem
+	Physical     *virtual.Storage       //physical mem
+	Swap         *virtual.Storage       //swap mem
 	ProcessList  map[int]*types.Process //list of process objects
 	ReplacementQ *replacement.FIFO
 	CommandQueue chan string
@@ -28,8 +28,8 @@ func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 		Running:      false,
 		PageSize:     pagesize,
 		Reader:       reader.NewReader(),
-		PhysicalMem:  virtual.NewStorage(physicalSize, pagesize),
-		SwapMemory:   virtual.NewStorage(swapSize, pagesize),
+		Physical:     virtual.NewStorage(physicalSize, pagesize),
+		Swap:         virtual.NewStorage(swapSize, pagesize),
 		ReplacementQ: replacement.NewFIFO(),
 		ProcessList:  make(map[int]*types.Process, 0),
 		TimeStep:     0,
@@ -67,7 +67,7 @@ func (m *MemoryManager) handleInput(r *types.Request) {
 		break
 	case globals.End:
 		m.Pause()
-		m.PhysicalMem.View()
+		m.Physical.View()
 		break
 	default:
 		fmt.Println("Command could not be read ")

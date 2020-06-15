@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sysops/globals"
 	"sysops/system"
 	"sysops/types"
@@ -8,7 +9,7 @@ import (
 
 func main() {
 
-	pageSize := 4 //bytes
+	pageSize := 6 //bytes
 
 	// mem := types.NewProcess(420, 9, 4)
 
@@ -23,18 +24,35 @@ func main() {
 
 	manager := system.New(globals.MaxSize, 100, pageSize)
 
-	p1 := types.NewProcess(1, 50, pageSize)
-	// p2 := types.NewProcess(2, 5, pageSize)
+	p1 := types.NewProcess(1, 45, pageSize)
+	p2 := types.NewProcess(2, 9, pageSize)
 	// p3 := types.NewProcess(3, 50, pageSize)
+	// frame := types.NewPage(1, 0)
+	// frame1 := types.NewPage(2, 0)
+	// frame2 := types.NewPage(3, 0)
 
+	// manager.SwapPage()
+	// manager.SwapPage()
+	// manager.SwapPage()
+
+	// manager.SwapMemory()
 	// // // // fmt.Println(len(p1.Pages))
 	manager.LoadProcess(p1)
-	// // manager.LoadProcess(p2)
+
+	manager.LoadProcess(p2)
+
+	// manager.FreeProcess(p1)
+	// manager.LoadProcess(p2)
 	// manager.LoadProcess(p3)
 	// manager.LoadProcess(p2)
 	// manager.FreePages(p3)
 
-	manager.PhysicalMem.View()
+	manager.AccessMemory(p1, 2, 0)
+
+	fmt.Println("\nPhysical Memory \n")
+	manager.Physical.View()
+	fmt.Println("\nSwap Memory \n")
+	manager.Swap.View()
 
 	// for _, page := range p3.Pages {
 
