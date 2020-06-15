@@ -70,7 +70,7 @@ func Validate(command []string) (bool, *types.Request) {
 				return false, nil
 			}
 			//generate request
-			req := types.NewRequest(globals.Access, []int{int(addr), int(proc), int(val)}, []string{})
+			req := types.NewRequest(globals.Access, []int{int(proc), int(addr), int(val)}, []string{})
 			return true, req
 		}
 		return false, nil

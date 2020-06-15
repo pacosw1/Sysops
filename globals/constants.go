@@ -4,8 +4,8 @@ package globals
 const (
 	//LoadP loads a process into memory
 	LoadP = "P"
-
-	MaxSize = 50
+	//Máximo tamaño de la
+	MaxSize = 2049
 	//Access fetches the virtual memory address of a process
 	Access = "A"
 	//FreeP frees all pages from main memory for a process

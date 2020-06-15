@@ -3,11 +3,14 @@ package system
 import (
 	"fmt"
 	"sysops/globals"
+	"sysops/monitor"
 	"sysops/types"
 )
 
 //InsertPage inserts a single page to Physicalory
 func (m *MemoryManager) InsertPage(page *types.Page) {
+
+	logger := m.Monitor.Requests[m.CommandNum]
 
 	// replaceQ := m.ReplacementQ
 	spaceTracker := m.Physical.SpaceTracker
@@ -18,11 +21,12 @@ func (m *MemoryManager) InsertPage(page *types.Page) {
 		m.SwapOut()
 	}
 
+	before := types.CopyPage(page)
+
 	//if space in physical memory
 	if !spaceTracker.Empty() {
 
 		//insertion takes 1 second per page
-		m.TimeStep++
 
 		availableFrame := spaceTracker.Pop()
 		//update page
@@ -37,10 +41,20 @@ func (m *MemoryManager) InsertPage(page *types.Page) {
 	} else { //swap was full too
 		fmt.Println("no space in memory")
 	}
+
+	after := types.CopyPage(page)
+	log := monitor.NewPageLog(monitor.Insert, monitor.FromNew, monitor.ToMem, before, after, m.TimeStep)
+	logger.AddLog(log)
+	m.Monitor.AddLog(log)
+
+	m.TimeStep++
+
 }
 
 //SwapIn swaps a single page to real memory
 func (m *MemoryManager) SwapIn(page *types.Page) {
+
+	logger := m.Monitor.Requests[m.CommandNum]
 
 	//keep track of free spaces in swap and real mem
 	spaceTracker := m.Physical.SpaceTracker
@@ -51,18 +65,20 @@ func (m *MemoryManager) SwapIn(page *types.Page) {
 	swapMem := m.Swap.Memory
 
 	//swapping takes one second per page
-	m.TimeStep++
 
 	//add it to free page list
-	swapSpaceTracker.Add(page.SwapFrame) //add released frame to free frames
-
-	swapMem[page.SwapFrame] = nil //free page from swap memory
 
 	if spaceTracker.Empty() { //swap out a page is memory is full
 		m.SwapOut()
 	}
 
+	swapSpaceTracker.Add(page.SwapFrame) //add released frame to free frames
+
+	before := types.CopyPage(page)
+
 	availableFrame := spaceTracker.Pop() //find a free space in real memory
+
+	swapMem[page.SwapFrame] = nil //free page from swap memory
 
 	//update page info
 	page.SwapFrame = -1
@@ -71,10 +87,20 @@ func (m *MemoryManager) SwapIn(page *types.Page) {
 	//store it in real memory
 	realMem[availableFrame] = page
 
+	after := types.CopyPage(page)
+
+	log := monitor.NewPageLog(monitor.SwapIn, monitor.FromSwap, monitor.ToMem, before, after, m.TimeStep)
+	logger.AddLog(log)
+	m.Monitor.AddLog(log)
+
+	m.TimeStep++
+
 }
 
 //SwapOut swaps a single page to swap memory
 func (m *MemoryManager) SwapOut() {
+
+	logger := m.Monitor.Requests[m.CommandNum]
 
 	//if nothing to replace return
 	if m.ReplacementQ.Empty() {
@@ -82,9 +108,9 @@ func (m *MemoryManager) SwapOut() {
 		return
 	}
 	//swapping takes 1 second per page
-	m.TimeStep++
 
-	page := m.ReplacementQ.Remove() //get oldest value to be replaced
+	page := m.ReplacementQ.Pop() //get oldest value to be replaced
+	before := types.CopyPage(page)
 
 	//keep track of free spaces in swap and real mem
 	spaceTracker := m.Physical.SpaceTracker
@@ -107,10 +133,20 @@ func (m *MemoryManager) SwapOut() {
 	//store it in swap
 	swapMem[availableFrame] = page
 
+	after := types.CopyPage(page)
+
+	log := monitor.NewPageLog(monitor.SwapOut, monitor.FromMem, monitor.ToSwap, before, after, m.TimeStep)
+	logger.AddLog(log)
+	m.Monitor.AddLog(log)
+
+	m.TimeStep++
+
 }
 
-//LoadProcess loads a proces into memory
+//LoadProcess loads a process into memory
 func (m *MemoryManager) LoadProcess(p *types.Process) {
+
+	m.Monitor.AddRequest(monitor.NewCommandEvent(globals.LoadP, m.CommandNum, m.TimeStep))
 
 	spaceTracker := m.Physical.SpaceTracker //keep track of free spaces
 	swapSpaceTracker := m.Swap.SpaceTracker //keep track of swap frames
@@ -137,8 +173,10 @@ func (m *MemoryManager) LoadProcess(p *types.Process) {
 	for i := 0; i < pages; i++ {
 		page := p.Pages[i]
 		m.InsertPage(page)
-
 	}
+
+	m.Monitor.Requests[m.CommandNum].End = m.TimeStep
+	m.CommandNum++
 }
 
 func validSize(size int) bool {

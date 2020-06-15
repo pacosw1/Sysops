@@ -48,6 +48,24 @@ func (l *LRU) Print() {
 	}
 }
 
+//Remove removes an item from the queue
+func (l *LRU) Remove(p *types.Page) {
+
+	PID := parseUID(p)
+
+	node := l.Hash[PID]
+
+	if node == nil {
+		fmt.Println(("Process not present in list"))
+	}
+
+	//deletes page from list
+	l.OrderList.Remove(node)
+	//deletes page from hash tables
+	delete(l.Hash, PID)
+
+}
+
 //Push adds Page to the front of the list, used when introducing program to memory
 func (l *LRU) Push(page *types.Page) {
 

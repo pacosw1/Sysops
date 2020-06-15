@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"sysops/globals"
+	"sysops/monitor"
 	"sysops/reader"
 	"sysops/replacement"
 	"sysops/types"
@@ -20,6 +21,9 @@ type MemoryManager struct {
 	ReplacementQ *replacement.FIFO
 	CommandQueue chan string
 	TimeStep     float32
+	Monitor      *monitor.Monitor
+	CommandNum   int
+	Commands     []*monitor.CommandEvent
 }
 
 //New creates a new Memory Manager
@@ -32,6 +36,8 @@ func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 		Swap:         virtual.NewStorage(swapSize, pagesize),
 		ReplacementQ: replacement.NewFIFO(),
 		ProcessList:  make(map[int]*types.Process, 0),
+		Monitor:      monitor.NewMonitor(),
+		CommandNum:   0,
 		TimeStep:     0.0,
 	}
 }
@@ -46,9 +52,13 @@ func (m *MemoryManager) Start() {
 //handleInput handles input received from reader and executes them
 func (m *MemoryManager) handleInput(r *types.Request) {
 
-	println("processing input")
+	// println("processing input")
 	switch r.Type {
 	case globals.Access:
+		PID := r.Args[0]
+		vAddr := r.Args[1]
+		mod := r.Args[2]
+		m.AccessMemory(PID, vAddr, mod)
 		break
 	case globals.LoadP: //handles loading a new process
 		size := r.Args[0]
@@ -56,9 +66,12 @@ func (m *MemoryManager) handleInput(r *types.Request) {
 		m.LoadProcess(types.NewProcess(pID, size, m.PageSize))
 		break
 	case globals.Print: //handles printing a message
-		PrintMessage(r.Message, globals.Print)
+		// PrintMessage(r.Message, globals.Print)
 		break
 	case globals.FreeP: //handles freeing process vars
+		PID := r.Args[0]
+		m.FreeProcess(PID)
+		// m.Physical.View()
 		break
 	case globals.Stats:
 		m.Pause()
@@ -67,7 +80,7 @@ func (m *MemoryManager) handleInput(r *types.Request) {
 		break
 	case globals.End:
 		m.Pause()
-		m.Physical.View()
+		// m.Swap.View()
 		break
 	default:
 		fmt.Println("Command could not be read ")

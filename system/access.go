@@ -2,7 +2,8 @@ package system
 
 import (
 	"fmt"
-	"sysops/types"
+	"sysops/globals"
+	"sysops/monitor"
 )
 
 func getRealAddr(realPage, pageSize, offset int) int {
@@ -10,7 +11,16 @@ func getRealAddr(realPage, pageSize, offset int) int {
 }
 
 //AccessMemory access or modify bits inside pages
-func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
+func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
+
+	p := mm.ProcessList[PID]
+
+	if p == nil {
+		fmt.Printf("Process does not exist in simulation")
+	}
+
+	//initialize command logger
+	mm.Monitor.AddRequest(monitor.NewCommandEvent(globals.Access, mm.CommandNum, mm.TimeStep))
 
 	//validation bit overflow
 	if vAddr >= p.Size {
@@ -23,9 +33,7 @@ func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
 
 	//if bit in real memory
 	if page.SwapFrame >= 0 { //esta en el swap
-		fmt.Printf("position in swap %d \n ", page.SwapFrame)
 		mm.SwapIn(page) //add it to physical memory
-
 	}
 
 	if m == 1 {
@@ -33,9 +41,12 @@ func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
 		//Actualizar LRU
 	}
 
-	mm.TimeStep += 0.1 // access time
+	// physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
 
-	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
-	fmt.Printf("realAddr: %d \n ", physicalAddress)
+	//records end of command
+	mm.Monitor.Requests[mm.CommandNum].End = mm.TimeStep
+	mm.CommandNum++
+
+	mm.TimeStep += 0.1 // access time
 
 }

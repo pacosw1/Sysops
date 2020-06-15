@@ -47,6 +47,7 @@ func (r *Reader) Decode() {
 			ok, req := validation.Validate(str)
 			if ok {
 				r.CommandQ <- req
+				fmt.Println(str)
 				// fmt.Println("Command Received: ", str)
 			} else {
 				fmt.Println("Invalid Command", str)
