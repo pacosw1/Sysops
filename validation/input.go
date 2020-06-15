@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"sysops/globals"
-	"sysops/monitor"
+	"sysops/requests"
 )
 
 //checks if input command argument is a number
@@ -18,8 +18,9 @@ func isNumber(arg string) (bool, int64) {
 }
 
 //Validate commands, returns bool, and request if sucessful, if not, request will be empty
-func Validate(command []string) (bool, monitor.Request) {
+func Validate(command []string) (bool, requests.Request) {
 
+	var req requests.Request
 	//Command Type is the first argument
 	action := command[0]
 
@@ -29,7 +30,7 @@ func Validate(command []string) (bool, monitor.Request) {
 	case globals.Print: //Print, prints a message to console
 
 		//create command
-		req := monitor.NewCommentReq(command)
+		req = requests.NewCommentReq(command)
 		//return valid and request
 		return true, req
 
@@ -45,7 +46,7 @@ func Validate(command []string) (bool, monitor.Request) {
 		if valid && validID {
 			//checks that given size is within valid ranges, max size here is declared in globals folder
 			if size <= globals.MaxSize { //if all cases passed, create request and return true
-				req := monitor.NewLoadReq(command, int(pID), int(size))
+				req = requests.NewLoadP(command, int(pID), int(size))
 				return true, req
 			}
 		}
@@ -70,7 +71,7 @@ func Validate(command []string) (bool, monitor.Request) {
 				return false, nil
 			}
 			//generate request
-			req := monitor.NewAccessReq(command, int(proc), int(addr), int(val))
+			req = requests.NewAccessReq(command, int(proc), int(addr), int(val))
 			return true, req
 		}
 		return false, nil
@@ -86,7 +87,7 @@ func Validate(command []string) (bool, monitor.Request) {
 			return false, nil
 		}
 		//generate request
-		req := monitor.NewFreeMemReq(command, int(num))
+		req = requests.NewFreeMemReq(command, int(num))
 		return true, req
 	case globals.Stats:
 		//command len valid?
@@ -99,7 +100,7 @@ func Validate(command []string) (bool, monitor.Request) {
 		if len(command) > 1 {
 			return false, nil
 		}
-		return true, nil
+		return true, requests.NewEndReq(command)
 	default:
 		fmt.Println("Command not recognized")
 		return false, nil

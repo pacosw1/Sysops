@@ -13,7 +13,7 @@ func (m *MemoryManager) FreeProcess(PID int) {
 
 	//if process does not exist
 	if process == nil {
-		fmt.Printf("Process %d does not exist", PID)
+		fmt.Printf("Process %d does not exist \n", PID)
 		return
 	}
 

@@ -40,7 +40,7 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 	//update LRU if active
 	mm.ReplacementQ.Push(page)
 
-	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
+	// physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
 
 	//records end of command
 	mm.Monitor.Requests[mm.CommandNum].End = mm.TimeStep
@@ -48,6 +48,6 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 
 	mm.TimeStep += 0.1 // access time
 
-	fmt.Printf(" \nphysical Address: %d  PID: %d  ID: %d \n", physicalAddress, page.PID, page.ID)
+	// fmt.Printf(" \nphysical Address: %d  PID: %d  ID: %d \n", physicalAddress, page.PID, page.ID)
 
 }

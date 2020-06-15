@@ -6,6 +6,7 @@ import (
 	"sysops/monitor"
 	"sysops/reader"
 	"sysops/replacement"
+	"sysops/requests"
 	"sysops/types"
 	"sysops/virtual"
 )
@@ -62,34 +63,40 @@ func (m *MemoryManager) Start() {
 }
 
 //handleInput handles input received from reader and executes them
-func (m *MemoryManager) handleInput(r monitor.Request) {
+func (m *MemoryManager) handleInput(r requests.Request) {
 
-	// println("processing input")
-	switch r.Type {
+	fmt.Println(r.Args())
+	tipe := r.GetType()
+	switch tipe {
 
 	case globals.Access:
 		//initialize command logger
 		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.Access, m.CommandNum, m.TimeStep))
-		PID := r
-		vAddr := r.Args[1]
-		mod := r.Args[2]
+		args := r.Args()
+
+		PID := args[0]
+		vAddr := args[1]
+		mod := args[2]
 		m.AccessMemory(PID, vAddr, mod)
 		break
 	case globals.LoadP: //handles loading a new process
 
 		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.LoadP, m.CommandNum, m.TimeStep))
-		size := r.Args[0]
-		pID := r.Args[1]
-		m.LoadProcess(types.NewProcess(pID, size, m.PageSize))
+		args := r.Args()
+		PID := args[0]
+		size := args[1]
+		m.LoadProcess(types.NewProcess(PID, size, m.PageSize))
 		break
 	case globals.Print: //handles printing a message
-		PrintMessage(r.Message, globals.Print)
+		// PrintMessage(, globals.Print)
 		break
 	case globals.FreeP: //handles freeing process vars
 
 		//initalize command logger
 		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.FreeP, m.CommandNum, m.TimeStep))
-		PID := r.Args[0]
+		args := r.Args()
+
+		PID := args[0]
 		m.FreeProcess(PID)
 		// m.Physical.View()
 		break
@@ -100,6 +107,7 @@ func (m *MemoryManager) handleInput(r monitor.Request) {
 		break
 	case globals.End:
 		m.Pause()
+		// m.Physical.View()
 		// m.Swap.View()
 		break
 	default:
