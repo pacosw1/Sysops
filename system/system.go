@@ -19,7 +19,7 @@ type MemoryManager struct {
 	ProcessList  map[int]*types.Process //list of process objects
 	ReplacementQ *replacement.FIFO
 	CommandQueue chan string
-	TimeStep     int
+	TimeStep     float32
 }
 
 //New creates a new Memory Manager
@@ -32,7 +32,7 @@ func New(physicalSize, swapSize, pagesize int) *MemoryManager {
 		Swap:         virtual.NewStorage(swapSize, pagesize),
 		ReplacementQ: replacement.NewFIFO(),
 		ProcessList:  make(map[int]*types.Process, 0),
-		TimeStep:     0,
+		TimeStep:     0.0,
 	}
 }
 

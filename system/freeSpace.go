@@ -28,6 +28,7 @@ func (m *MemoryManager) FreeProcess(p *types.Process) {
 
 //FreePage frees a page from memory
 func (m *MemoryManager) FreePage(p *types.Page) {
+	m.TimeStep += 0.1 //process time
 
 	if p.PageFrame >= 0 {
 		pageFrame := p.PageFrame

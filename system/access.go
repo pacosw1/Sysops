@@ -24,8 +24,7 @@ func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
 	//if bit in real memory
 	if page.SwapFrame >= 0 { //esta en el swap
 		fmt.Printf("position in swap %d \n ", page.SwapFrame)
-		mm.FreePage(page)
-		mm.InsertPage(page)
+		mm.SwapIn(page) //add it to physical memory
 
 	}
 
@@ -33,6 +32,8 @@ func (mm *MemoryManager) AccessMemory(p *types.Process, vAddr int, m int) {
 		page.Mod = true
 		//Actualizar LRU
 	}
+
+	mm.TimeStep += 0.1 // access time
 
 	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
 	fmt.Printf("realAddr: %d \n ", physicalAddress)
