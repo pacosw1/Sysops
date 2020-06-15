@@ -27,11 +27,16 @@ func (l *LRU) Empty() bool {
 }
 
 //Peek returns the next value to be removed
-func (l *LRU) Peek() (*types.Page, bool) {
+func (l *LRU) Peek() *types.Page {
 	back, ok := l.OrderList.Back().Value.(*types.Page)
-	return back, ok
+
+	if !ok {
+		return nil
+	}
+	return back
 }
 
+//Print prints the LRU queue
 func (l *LRU) Print() {
 
 	dummy := l.OrderList.Front()
@@ -56,7 +61,7 @@ func (l *LRU) Remove(p *types.Page) {
 	node := l.Hash[PID]
 
 	if node == nil {
-		fmt.Println(("Process not present in list"))
+		return
 	}
 
 	//deletes page from list
@@ -69,28 +74,26 @@ func (l *LRU) Remove(p *types.Page) {
 //Push adds Page to the front of the list, used when introducing program to memory
 func (l *LRU) Push(page *types.Page) {
 
+	//create a unique id using processID and pageID
 	UID := parseUID(page)
 
 	//nill if not inside hash
 	node := l.Hash[UID]
-	//if value not in our list
-	if node == nil {
-		//store node inside hash
-
-		// fmt.Println(newNode.Value)
-		//add page to the front of our list
-		l.OrderList.PushFront(page)
-		//add node to the hash table
-		l.Hash[UID] = l.OrderList.Front()
-		// fmt.Println(l.OrderList.Front().Value)
-	} else { //else use it and update its position
-		l.Use(UID)
+	//if value already in our list
+	if node != nil {
+		l.use(UID)
+		return
 	}
+
+	//add page to the front of our list if not present
+	l.OrderList.PushFront(page)
+	//add node to the hash table
+	l.Hash[UID] = l.OrderList.Front()
 
 }
 
 //Use uses a value, and thus moves it to the most recently used position in list (front)
-func (l *LRU) Use(UID string) {
+func (l *LRU) use(UID string) {
 	//create unique ID
 	node := l.Hash[UID]
 	l.OrderList.MoveToFront(node)
@@ -103,14 +106,14 @@ func parseUID(p *types.Page) string {
 }
 
 //Pop returns and removes the next value in list back, LRUsed value
-func (l *LRU) Pop() (*types.Page, bool) {
+func (l *LRU) Pop() *types.Page {
 
 	//type assertion
 	back, ok := l.OrderList.Back().Value.(*types.Page)
 
 	if !ok {
 		fmt.Print("LRU empty")
-		return nil, true
+		return nil
 	}
 
 	//deletes page from list
@@ -118,5 +121,5 @@ func (l *LRU) Pop() (*types.Page, bool) {
 	//deletes page from hash tables
 	delete(l.Hash, parseUID(back))
 
-	return back, ok
+	return back
 }

@@ -2,8 +2,6 @@ package system
 
 import (
 	"fmt"
-	"sysops/globals"
-	"sysops/monitor"
 )
 
 func getRealAddr(realPage, pageSize, offset int) int {
@@ -17,10 +15,8 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 
 	if p == nil {
 		fmt.Printf("Process does not exist in simulation")
+		return
 	}
-
-	//initialize command logger
-	mm.Monitor.AddRequest(monitor.NewCommandEvent(globals.Access, mm.CommandNum, mm.TimeStep))
 
 	//validation bit overflow
 	if vAddr >= p.Size {
@@ -36,17 +32,22 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 		mm.SwapIn(page) //add it to physical memory
 	}
 
+	//if page modified
 	if m == 1 {
 		page.Mod = true
-		//Actualizar LRU
 	}
 
-	// physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
+	//update LRU if active
+	mm.ReplacementQ.Push(page)
+
+	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
 
 	//records end of command
 	mm.Monitor.Requests[mm.CommandNum].End = mm.TimeStep
 	mm.CommandNum++
 
 	mm.TimeStep += 0.1 // access time
+
+	fmt.Printf(" \nphysical Address: %d  PID: %d  ID: %d \n", physicalAddress, page.PID, page.ID)
 
 }

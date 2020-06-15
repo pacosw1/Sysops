@@ -16,4 +16,8 @@ const (
 	Stats = "F"
 	//End ends simulation and stops program
 	End = "E"
+	//FIFO algo
+	FIFO = 0
+	//LRU algo
+	LRU = 1
 )

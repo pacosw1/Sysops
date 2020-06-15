@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"sysops/types"
+	"sysops/monitor"
 	"sysops/validation"
 )
 
@@ -12,7 +12,7 @@ import (
 type Reader struct {
 	RawData  string
 	Path     string
-	CommandQ chan *types.Request
+	CommandQ chan *monitor.Request
 }
 
 //NewReader initialized an empty Reader object
@@ -21,7 +21,7 @@ func NewReader() *Reader {
 	return &Reader{
 		Path:     "", //file path to be read
 		RawData:  "", //buffer to store read input as a string
-		CommandQ: make(chan *types.Request, 100),
+		CommandQ: make(chan *monitor.Request, 100),
 	}
 }
 

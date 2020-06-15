@@ -2,16 +2,12 @@ package system
 
 import (
 	"fmt"
-	"sysops/globals"
 	"sysops/monitor"
 	"sysops/types"
 )
 
 //FreeProcess frees all pages from a specific process
 func (m *MemoryManager) FreeProcess(PID int) {
-
-	//initalize command logger
-	m.Monitor.AddRequest(monitor.NewCommandEvent(globals.FreeP, m.CommandNum, m.TimeStep))
 
 	process := m.ProcessList[PID]
 
@@ -30,6 +26,7 @@ func (m *MemoryManager) FreeProcess(PID int) {
 	}
 
 	//record command end
+	delete(m.ProcessList, PID)
 	m.Monitor.Requests[m.CommandNum].End = m.TimeStep
 	m.CommandNum++
 
@@ -39,8 +36,8 @@ func (m *MemoryManager) FreeProcess(PID int) {
 func (m *MemoryManager) FreePage(p *types.Page) {
 
 	logger := m.Monitor.Requests[m.CommandNum]
-
 	var before *types.Page = types.CopyPage(p)
+
 	if p.PageFrame >= 0 {
 		pageFrame := p.PageFrame
 		m.Physical.SpaceTracker.Add(pageFrame)

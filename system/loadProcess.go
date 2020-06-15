@@ -36,7 +36,7 @@ func (m *MemoryManager) InsertPage(page *types.Page) {
 		//insert it to memory
 		realMem[availableFrame] = page
 		//add new page to replacement q
-		m.ReplacementQ.Add(page)
+		m.ReplacementQ.Push(page)
 
 	} else { //swap was full too
 		fmt.Println("no space in memory")
@@ -104,7 +104,6 @@ func (m *MemoryManager) SwapOut() {
 
 	//if nothing to replace return
 	if m.ReplacementQ.Empty() {
-		fmt.Println("No page to replace, empty memory")
 		return
 	}
 	//swapping takes 1 second per page
@@ -145,8 +144,6 @@ func (m *MemoryManager) SwapOut() {
 
 //LoadProcess loads a process into memory
 func (m *MemoryManager) LoadProcess(p *types.Process) {
-
-	m.Monitor.AddRequest(monitor.NewCommandEvent(globals.LoadP, m.CommandNum, m.TimeStep))
 
 	spaceTracker := m.Physical.SpaceTracker //keep track of free spaces
 	swapSpaceTracker := m.Swap.SpaceTracker //keep track of swap frames

@@ -12,6 +12,7 @@ type FIFO struct {
 	Location  map[string]*list.Element
 }
 
+//NewFIFO creates and initializes a new fifo struct
 func NewFIFO() *FIFO {
 	return &FIFO{
 		OrderList: list.New(),
@@ -35,19 +36,48 @@ func (f *FIFO) Empty() bool {
 	return f.OrderList.Len() == 0
 }
 
-//Add adds Page to the front of the list, used when introducing program to memory
-func (f *FIFO) Add(page *types.Page) {
+//Push adds Page to the front of the list, used when introducing program to memory
+func (f *FIFO) Push(page *types.Page) {
+
+	UID := parseUID(page)
+
+	node := f.Location[UID]
+
+	//already exists in list, do nothing
+	if node != nil {
+		return
+	}
+
+	//else add it to structure
+
 	f.OrderList.PushFront(page)
-	f.Location[parseUID(page)] = f.OrderList.Front()
+	f.Location[UID] = f.OrderList.Front()
 }
 
+//Print prints queue
+func (f *FIFO) Print() {
+
+	dummy := f.OrderList.Front()
+
+	if f.Empty() {
+		return
+	}
+
+	for dummy != nil {
+		// fmt.Println(dummy.Value)
+		val, _ := dummy.Value.(*types.Page)
+		fmt.Printf("PID: %d Page#: %d  -->  ", val.PID, val.ID)
+		dummy = dummy.Next()
+	}
+}
+
+//Remove removes a page from replacement queue
 func (f *FIFO) Remove(p *types.Page) {
 
 	UID := parseUID(p)
 	node := f.Location[UID]
 
 	if node == nil {
-		fmt.Println("Page not present on list")
 		return
 	}
 
@@ -56,7 +86,7 @@ func (f *FIFO) Remove(p *types.Page) {
 
 }
 
-//Remove returns and removes the next value in list back, LRUsed value
+//Pop returns and removes the next value in list back, LRUsed value
 func (f *FIFO) Pop() *types.Page {
 
 	last, _ := f.OrderList.Back().Value.(*types.Page)
