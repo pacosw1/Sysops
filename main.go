@@ -2,7 +2,7 @@ package main
 
 import (
 	"sysops/globals"
-	"sysops/system"
+	system "sysops/simulation"
 )
 
 func main() {
@@ -15,8 +15,12 @@ func main() {
 	manager.Reader.Decode()
 
 	manager.Start()
+
+	manager.Monitor.GenerateStats()
 	// p1 := types.NewProcess(4, 48, 16)
 	// p2 := types.NewProcess(3, 2048, 16)
+
+	// req := len(manager.Monitor.Requests)
 
 	// manager.Swap.View()
 	// manager.LoadProcess(p1)

@@ -1,8 +1,8 @@
-package system
+package simulation
 
 import (
 	"fmt"
-	"sysops/monitor"
+	"sysops/requests"
 	"sysops/types"
 )
 
@@ -27,15 +27,16 @@ func (m *MemoryManager) FreeProcess(PID int) {
 
 	//record command end
 	delete(m.ProcessList, PID)
-	m.Monitor.Requests[m.CommandNum].End = m.TimeStep
-	m.CommandNum++
 
 }
 
 //FreePage frees a page from memory
 func (m *MemoryManager) FreePage(p *types.Page) {
 
-	logger := m.Monitor.Requests[m.CommandNum]
+	monitor := m.Monitor
+	//current request
+	req := monitor.Requests[m.Monitor.ReqNum]
+
 	var before *types.Page = types.CopyPage(p)
 
 	if p.PageFrame >= 0 {
@@ -48,9 +49,10 @@ func (m *MemoryManager) FreePage(p *types.Page) {
 		p.SwapFrame = -1
 		after := types.CopyPage(p)
 
-		log := monitor.NewPageLog(monitor.Freed, monitor.FromSwap, monitor.ToNull, before, after, m.TimeStep)
-		logger.AddLog(log)
-		m.Monitor.AddLog(log)
+		log := requests.NewPageLog(requests.Freed, requests.FromSwap, requests.ToNull, before, after, m.TimeStep)
+		//save logs
+		monitor.AddLog(log)
+		req.AddLog(log)
 
 	} else {
 		swapFrame := p.SwapFrame
@@ -60,9 +62,10 @@ func (m *MemoryManager) FreePage(p *types.Page) {
 		p.SwapFrame = -1
 		after := types.CopyPage(p)
 
-		log := monitor.NewPageLog(monitor.Freed, monitor.FromSwap, monitor.ToNull, before, after, m.TimeStep)
-		logger.AddLog(log)
-		m.Monitor.AddLog(log)
+		log := requests.NewPageLog(requests.Freed, requests.FromSwap, requests.ToNull, before, after, m.TimeStep)
+		//save logs
+		monitor.AddLog(log)
+		req.AddLog(log)
 
 	}
 

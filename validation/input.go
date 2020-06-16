@@ -94,7 +94,7 @@ func Validate(command []string) (bool, requests.Request) {
 		if len(command) > 1 {
 			return false, nil
 		}
-		return true, nil
+		return true, requests.NewStatsReq(command)
 	case globals.End:
 		//command len valid?
 		if len(command) > 1 {

@@ -1,30 +1,9 @@
-package monitor
+package requests
 
 import (
 	"fmt"
 	"sysops/types"
 )
-
-//Stats Monitor
-type Monitor struct {
-	Logs     []*PageLog
-	Requests []*CommandEvent
-}
-
-//NewMonitor new monitor
-func NewMonitor() *Monitor {
-	return &Monitor{
-		Logs:     []*PageLog{},
-		Requests: []*CommandEvent{},
-	}
-}
-
-//AddRequest adds a new request to be logged
-func (m *Monitor) AddRequest(c *CommandEvent) {
-	m.Requests = append(m.Requests, c)
-}
-
-//Swap
 
 const (
 	//Insert a page was loaded into memory
@@ -36,7 +15,7 @@ const (
 	//Freed a page was freed from memory
 	Freed = "FREED"
 	//PageFault a page fault is created to load a certain process into memory
-	PageFault = "PAGEFUALT"
+	PageFault = "PAGEFAULT"
 )
 
 const (
@@ -55,7 +34,6 @@ const (
 	ToNull = "TONULL"
 )
 
-//PageLog logs page actions and data
 type PageLog struct {
 	Type        string
 	Source      string
@@ -63,11 +41,6 @@ type PageLog struct {
 	PageBefore  *types.Page
 	PageAfter   *types.Page
 	TimeStep    float32
-}
-
-//AddLog adds a log to the queue
-func (m *Monitor) AddLog(pageLog *PageLog) {
-	m.Logs = append(m.Logs, pageLog)
 }
 
 //Print []
@@ -94,53 +67,5 @@ func NewPageLog(t string, src string, dest string, before, after *types.Page, st
 		PageAfter:   after,
 		TimeStep:    step,
 	}
-
-}
-
-/*
-switch t {
-	case Insert:
-		break
-	case SwapIn:
-		break
-	case SwapOut:
-		break
-	case Freed:
-		break
-	case PageFault:
-		break
-	}
-*/
-//CommandEvent c
-type CommandEvent struct {
-	Type   string
-	Start  float32
-	End    float32
-	Output []int
-	Logs   []*PageLog
-	ID     int
-}
-
-//NewCommandEvent c
-func NewCommandEvent(t string, id int, start float32) *CommandEvent {
-	return &CommandEvent{
-		Type:   t,
-		Start:  start,
-		Logs:   []*PageLog{},
-		Output: []int{},
-		ID:     id,
-	}
-}
-
-//AddLog appendsd a log to the current command that is running
-func (c *CommandEvent) AddLog(p *PageLog) {
-
-	c.Logs = append(c.Logs, p)
-}
-
-//GenerateReport r
-func (m *Monitor) GenerateReport(id int) {
-
-	//collect all logs in command timestamp
 
 }

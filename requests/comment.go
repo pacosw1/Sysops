@@ -1,19 +1,19 @@
 package requests
 
 import (
+	"fmt"
 	"sysops/globals"
-	"sysops/monitor"
 )
 
-//FreeMem request to free mem
+//CommentReq request to free mem
 type CommentReq struct {
 	Type  string
 	Input []string
 	PID   int
-	Logs  []*monitor.PageLog
+	Logs  []*PageLog
 }
 
-//NewFreeMemReq n
+//NewCommentReq n
 func NewCommentReq(input []string) *CommentReq {
 
 	return &CommentReq{
@@ -25,6 +25,15 @@ func NewCommentReq(input []string) *CommentReq {
 //GenerateOutput p
 func (f *CommentReq) GenerateOutput() {
 
+	fmt.Println("-------------------------------------------------------------------\n")
+	fmt.Println(f.Input, "START\n")
+	fmt.Println("-------------------------------------------------------------------\n\n")
+
+	fmt.Println(f.Input[0])
+	fmt.Println(f.Input[1:])
+
+	fmt.Println("-------------------------------------------------------------------\n\n")
+
 }
 
 //Args a
@@ -35,4 +44,9 @@ func (f *CommentReq) Args() []int {
 //Type t
 func (f *CommentReq) GetType() string {
 	return f.Type
+}
+
+//Type t
+func (f *CommentReq) AddLog(p *PageLog) {
+
 }

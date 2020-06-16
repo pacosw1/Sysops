@@ -24,6 +24,11 @@ func (f *EndReq) GenerateOutput() {
 
 }
 
+//AddLog adds a log to the queue
+func (f *EndReq) AddLog(pageLog *PageLog) {
+
+}
+
 //Args a
 func (f *EndReq) Args() []int {
 	return []int{}

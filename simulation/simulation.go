@@ -1,4 +1,4 @@
-package system
+package simulation
 
 import (
 	"fmt"
@@ -22,8 +22,6 @@ type MemoryManager struct {
 	ReplacementQ replacement.Algo       //replacement algorithm, FIFO or LRU
 	Monitor      *monitor.Monitor
 	TimeStep     float32
-	CommandNum   int
-	Commands     []*monitor.CommandEvent
 }
 
 //New creates a new Memory Manager
@@ -50,7 +48,6 @@ func New(physicalSize, swapSize, replacementAlgo int, pagesize int) *MemoryManag
 		ProcessList:  map[int]*types.Process{},
 		Monitor:      monitor.NewMonitor(),
 		ReplacementQ: replacementQ,
-		CommandNum:   0,
 		TimeStep:     0.0,
 	}
 }
@@ -64,55 +61,70 @@ func (m *MemoryManager) Start() {
 
 //handleInput handles input received from reader and executes them
 func (m *MemoryManager) handleInput(r requests.Request) {
-
-	fmt.Println(r.Args())
+	monitor := m.Monitor
+	// fmt.Println(r.Args())
 	tipe := r.GetType()
 	switch tipe {
-
 	case globals.Access:
 		//initialize command logger
-		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.Access, m.CommandNum, m.TimeStep))
+		m.Monitor.AddRequest(r)
 		args := r.Args()
 
 		PID := args[0]
 		vAddr := args[1]
 		mod := args[2]
+
 		m.AccessMemory(PID, vAddr, mod)
+		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.ReqNum++
 		break
 	case globals.LoadP: //handles loading a new process
 
-		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.LoadP, m.CommandNum, m.TimeStep))
+		m.Monitor.AddRequest(r)
+
 		args := r.Args()
 		PID := args[0]
 		size := args[1]
+
 		m.LoadProcess(types.NewProcess(PID, size, m.PageSize))
+		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.ReqNum++
+
 		break
 	case globals.Print: //handles printing a message
-		// PrintMessage(, globals.Print)
+
+		monitor.AddRequest(r)
+		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.ReqNum++
+
 		break
 	case globals.FreeP: //handles freeing process vars
 
-		//initalize command logger
-		m.Monitor.AddRequest(monitor.NewCommandEvent(globals.FreeP, m.CommandNum, m.TimeStep))
+		m.Monitor.AddRequest(r)
 		args := r.Args()
 
 		PID := args[0]
 		m.FreeProcess(PID)
-		// m.Physical.View()
+
+		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.ReqNum++
 		break
 	case globals.Stats:
 		m.Pause()
 		//display stats
 		m.Resume()
+		monitor.ReqNum++
+
 		break
 	case globals.End:
+		monitor.AddRequest(r)
+		monitor.ReqNum++
 		m.Pause()
 		// m.Physical.View()
 		// m.Swap.View()
 		break
 	default:
 		fmt.Println("Command could not be read ")
-
 	}
 }
 
