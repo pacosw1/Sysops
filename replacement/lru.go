@@ -101,6 +101,7 @@ func (l *LRU) use(UID string) {
 
 }
 
+//Generates a unique id made up by page number and process ID
 func parseUID(p *types.Page) string {
 	return strconv.Itoa(p.PID) + strconv.Itoa(p.ID)
 }

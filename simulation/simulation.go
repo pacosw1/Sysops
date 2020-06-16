@@ -13,20 +13,21 @@ import (
 
 //MemoryManager manages and stores memory
 type MemoryManager struct {
-	PageSize     int
-	Running      bool
+	PageSize     int  //page size
+	Running      bool //isRunning
 	Reader       *reader.Reader
 	Physical     *virtual.Storage       //physical mem
 	Swap         *virtual.Storage       //swap mem
 	ProcessList  map[int]*types.Process //list of process objects
 	ReplacementQ replacement.Algo       //replacement algorithm, FIFO or LRU
-	Monitor      *monitor.Monitor
-	TimeStep     float32
+	Monitor      *monitor.Monitor       //monitor and log all events
+	TimeStep     float32                //timestep
 }
 
 //New creates a new Memory Manager
 func New(physicalSize, swapSize, replacementAlgo int, pagesize int) *MemoryManager {
 
+	//init replacement algo
 	var replacementQ replacement.Algo
 
 	//select replacement algo interface, switch open to future additions
@@ -74,8 +75,8 @@ func (m *MemoryManager) handleInput(r requests.Request) {
 		vAddr := args[1]
 		mod := args[2]
 
-		m.AccessMemory(PID, vAddr, mod)
-		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		output := m.AccessMemory(PID, vAddr, mod)
+		monitor.Requests[monitor.ReqNum].GenerateOutput(output)
 		monitor.ReqNum++
 		break
 	case globals.LoadP: //handles loading a new process
@@ -86,15 +87,15 @@ func (m *MemoryManager) handleInput(r requests.Request) {
 		PID := args[0]
 		size := args[1]
 
-		m.LoadProcess(types.NewProcess(PID, size, m.PageSize))
-		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		output := m.LoadProcess(types.NewProcess(PID, size, m.PageSize))
+		monitor.Requests[monitor.ReqNum].GenerateOutput(output)
 		monitor.ReqNum++
 
 		break
 	case globals.Print: //handles printing a message
 
 		monitor.AddRequest(r)
-		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.Requests[monitor.ReqNum].GenerateOutput("")
 		monitor.ReqNum++
 
 		break
@@ -104,16 +105,17 @@ func (m *MemoryManager) handleInput(r requests.Request) {
 		args := r.Args()
 
 		PID := args[0]
-		m.FreeProcess(PID)
+		output := m.FreeProcess(PID)
 
-		monitor.Requests[monitor.ReqNum].GenerateOutput()
+		monitor.Requests[monitor.ReqNum].GenerateOutput(output)
+
 		monitor.ReqNum++
 		break
-	case globals.Stats:
-		m.Pause()
-		//display stats
-		m.Resume()
-		monitor.ReqNum++
+	case globals.Stats: //display stats
+		m.Monitor.GenerateStats(m.TimeStep)
+		m.TimeStep = 0
+		//reset logs
+		m.Monitor.Reset()
 
 		break
 	case globals.End:
@@ -124,13 +126,19 @@ func (m *MemoryManager) handleInput(r requests.Request) {
 		// m.Swap.View()
 		break
 	default:
-		fmt.Println("Command could not be read ")
+		fmt.Println("No se detecto un comando end, terminando ejecucion")
 	}
 }
 
 func (m *MemoryManager) processInputs() {
 	for m.Running {
 		//receive a request from the queue
+
+		//in case no E input in file, end execution
+		if len(m.Reader.CommandQ) == 0 {
+			m.Pause()
+			break
+		}
 		req := <-m.Reader.CommandQ
 		m.handleInput(req)
 	}

@@ -56,7 +56,7 @@ func (m *MemoryManager) InsertPage(page *types.Page) {
 }
 
 //LoadProcess loads a process into memory
-func (m *MemoryManager) LoadProcess(p *types.Process) {
+func (m *MemoryManager) LoadProcess(p *types.Process) string {
 
 	spaceTracker := m.Physical.SpaceTracker //keep track of free spaces
 	swapSpaceTracker := m.Swap.SpaceTracker //keep track of swap frames
@@ -77,7 +77,7 @@ func (m *MemoryManager) LoadProcess(p *types.Process) {
 				m.Monitor.AddLog(requests.NewPageLog(requests.PageFault, requests.FromNew, requests.ToMem, &types.Page{PID: p.PID}, &types.Page{PID: p.PID}, m.TimeStep))
 				m.SwapOut()
 			} else {
-				//to do, if Swap full do something
+				return "Both Memory and Swap full, aborting"
 			}
 		}
 	}
@@ -87,31 +87,12 @@ func (m *MemoryManager) LoadProcess(p *types.Process) {
 		m.InsertPage(page)
 	}
 
+	//add programs to monitor statistics
 	m.Monitor.ProStats[p.PID] = monitor.NewProStats(m.TimeStep)
+	return "Process was loaded successfully"
 
 }
 
 func validSize(size int) bool {
-
 	return size <= globals.MaxSize
-
-}
-
-//FreePages loads a proces unto memory
-
-//PrintMessage prints message sent by input
-func PrintMessage(msg []string, action string) {
-	res := ""
-	for _, word := range msg {
-		res += word + " "
-	}
-
-	fmt.Println("INPUT: " + action)
-
-	if len(res) == 0 {
-		println("OUTPUT: Empty message \n\n")
-	} else {
-		fmt.Print("OUTPUT: " + res + "\n\n")
-		fmt.Println("")
-	}
 }

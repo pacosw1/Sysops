@@ -5,7 +5,7 @@ import (
 	"sysops/globals"
 )
 
-//FreeMem request to free mem
+//LoadP load process request
 type LoadP struct {
 	Type  string
 	Input []string
@@ -14,7 +14,7 @@ type LoadP struct {
 	Logs  []*PageLog
 }
 
-//NewFreeMemReq n
+//NewLoadP constructor
 func NewLoadP(input []string, PID int, size int) *LoadP {
 
 	return &LoadP{
@@ -31,67 +31,69 @@ func (f *LoadP) AddLog(pageLog *PageLog) {
 	f.Logs = append(f.Logs, pageLog)
 }
 
-//GenerateOutput p
-func (f *LoadP) GenerateOutput() {
-	fmt.Println("\n")
+//GenerateOutput generates log based output and function
+func (f *LoadP) GenerateOutput(output string) {
 
 	fmt.Println("-------------------------------------------------------------------\n")
 	fmt.Println(f.Input, "START\n")
 	fmt.Println("-------------------------------------------------------------------\n\n")
 
-	fmt.Println(f.Input)
-
 	///ejecuta
 	logs := f.Logs
 
-	//display assigned frames in memory
-	fmt.Println("Assigned: \n")
-	for i := 0; i < len(logs); i++ {
+	fmt.Println(output)
 
-		log := logs[i]
-		logType := log.Type
+	if len(logs) == 0 {
 
-		//display pages and their current location that were swapped out from real memory
-		if logType == Insert {
-			fmt.Printf("PID: %d  VP: %d  Frame: %d \t\t", log.PageAfter.PID, log.PageAfter.ID, log.PageAfter.PageFrame)
+	} else {
+		//display assigned frames in memory
+		fmt.Println("\nAssigned Frames: \n")
+		for i := 0; i < len(logs); i++ {
 
-		}
+			log := logs[i]
+			logType := log.Type
 
-	}
+			//display pages and their current location that were swapped out from real memory
+			if logType == Insert {
+				fmt.Printf("PID: %d  VP: %d  Frame: %d \t\t", log.PageAfter.PID, log.PageAfter.ID, log.PageAfter.PageFrame)
 
-	//display swapped frames if any
-	fmt.Println("\n\nFrames Swapped: \n")
-	for i := 0; i < len(logs); i++ {
-
-		log := logs[i]
-		logType := log.Type
-
-		//display pages and their current location that were swapped out from real memory
-		if logType == SwapOut {
-			fmt.Printf("PID: %d  VP: %d  Frame: %d \t\t", log.PageAfter.PID, log.PageAfter.ID, log.PageAfter.SwapFrame)
+			}
 
 		}
 
+		//display swapped frames if any
+		fmt.Println("\n\nFrames Swapped: \n")
+		for i := 0; i < len(logs); i++ {
+
+			log := logs[i]
+			logType := log.Type
+
+			//display pages and their current location that were swapped out from real memory
+			if logType == SwapOut {
+				fmt.Printf("PID: %d  VP: %d  Frame: %d \t\t", log.PageAfter.PID, log.PageAfter.ID, log.PageAfter.SwapFrame)
+
+			}
+
+		}
+
+		fmt.Println("\n")
+
 	}
-
-	fmt.Println("\n")
-
-	fmt.Println("-------------------------------------------------------------------\n\n")
 
 }
 
-//Args a
+//Args input arguments
 func (f *LoadP) Args() []int {
 	args := []int{f.PID, f.Size}
 	return args
 }
 
-//Type t
+//GetType return request type
 func (f *LoadP) GetType() string {
 	return f.Type
 }
 
-//GetLogs t
+//GetLogs getLogs
 func (f *LoadP) GetLogs() []*PageLog {
 	return f.Logs
 }

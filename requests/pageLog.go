@@ -34,6 +34,7 @@ const (
 	ToNull = "TONULL"
 )
 
+//Page log used to generate stats
 type PageLog struct {
 	Type        string
 	Source      string
@@ -43,7 +44,7 @@ type PageLog struct {
 	TimeStep    float32
 }
 
-//Print []
+//Print duh
 func (l *PageLog) Print() {
 
 	t := l.Type
@@ -56,7 +57,7 @@ func (l *PageLog) Print() {
 
 }
 
-//NewPageLog c
+//NewPageLog constructor
 func NewPageLog(t string, src string, dest string, before, after *types.Page, step float32) *PageLog {
 
 	return &PageLog{

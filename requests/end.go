@@ -4,13 +4,13 @@ import (
 	"sysops/globals"
 )
 
-//EndReq request to free mem
+//EndReq request to end program
 type EndReq struct {
 	Type  string
 	Input []string
 }
 
-//NewEndReq n
+//NewEndReq constructor
 func NewEndReq(input []string) *EndReq {
 
 	return &EndReq{
@@ -19,8 +19,8 @@ func NewEndReq(input []string) *EndReq {
 	}
 }
 
-//GenerateOutput p
-func (f *EndReq) GenerateOutput() {
+//GenerateOutput Generates output for this command
+func (f *EndReq) GenerateOutput(output string) {
 
 }
 
@@ -29,12 +29,12 @@ func (f *EndReq) AddLog(pageLog *PageLog) {
 
 }
 
-//Args a
+//Args input arguments
 func (f *EndReq) Args() []int {
 	return []int{}
 }
 
-//GetType t
+//GetType returns request type
 func (f *EndReq) GetType() string {
 	return f.Type
 }

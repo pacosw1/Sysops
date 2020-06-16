@@ -5,7 +5,7 @@ import (
 	"sysops/globals"
 )
 
-//AccessReq request to free mem
+//AccessReq memory request and data storage
 type AccessReq struct {
 	Type  string
 	Input []string
@@ -15,7 +15,7 @@ type AccessReq struct {
 	Logs  []*PageLog
 }
 
-//NewAccessReq n
+//NewAccessReq constructor
 func NewAccessReq(input []string, PID, vAddr, mod int) *AccessReq {
 
 	return &AccessReq{
@@ -28,7 +28,7 @@ func NewAccessReq(input []string, PID, vAddr, mod int) *AccessReq {
 	}
 }
 
-//GenerateOutput p
+//GenerateOutput generates output for this request
 func (f *AccessReq) GenerateOutput(output string) {
 
 	fmt.Println("\n")
@@ -39,43 +39,47 @@ func (f *AccessReq) GenerateOutput(output string) {
 
 	///ejecuta
 
+	fmt.Println(output)
+
 	logs := f.Logs
 
-	fmt.Println("\nFrames Swapped: \n")
-	for i := 0; i < len(logs); i++ {
+	if len(logs) > 0 {
 
-		log := logs[i]
-		logType := log.Type
+		fmt.Println("\nFrames Swapped: \n")
 
-		if logType == SwapOut {
-			fmt.Println("PID: %d  VP: %d SWAPage: %d \t", log.PageBefore.PID, log.PageBefore.ID, log.PageAfter.SwapFrame)
+		for i := 0; i < len(logs); i++ {
+
+			log := logs[i]
+			logType := log.Type
+
+			if logType == SwapOut {
+				fmt.Println("PID: %d  VP: %d Swap: %d \t", log.PageBefore.PID, log.PageBefore.ID, log.PageAfter.SwapFrame)
+			}
+
 		}
-
 	}
 
 	fmt.Println("\n")
 
-	fmt.Println("-------------------------------------------------------------------\n\n")
-
 }
 
-//Args a
+//Args returns input arguments
 func (f *AccessReq) Args() []int {
 	args := []int{f.PID, f.VAddr, f.Mod}
 	return args
 }
 
-//Type t
+//Type gets the request type
 func (f *AccessReq) GetType() string {
 	return f.Type
 }
 
-//GetLogs t
+//GetLogs Return logs for this command
 func (f *AccessReq) GetLogs() []*PageLog {
 	return f.Logs
 }
 
-//AddLog adds a log to the queue
+//AddLog adds a log to this command structure
 func (f *AccessReq) AddLog(pageLog *PageLog) {
 	f.Logs = append(f.Logs, pageLog)
 }

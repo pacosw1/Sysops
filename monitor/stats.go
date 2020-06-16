@@ -24,6 +24,13 @@ func NewMonitor() *Monitor {
 	}
 }
 
+func (m *Monitor) Reset() {
+	m.Logs = []*requests.PageLog{}
+	m.Requests = []requests.Request{}
+	m.ProStats = map[int]*ProStats{}
+	m.ReqNum = 0
+}
+
 //AddLog adds a new request to be logged
 func (m *Monitor) AddLog(c *requests.PageLog) {
 	m.Logs = append(m.Logs, c)
@@ -35,7 +42,7 @@ func (m *Monitor) AddRequest(r requests.Request) {
 }
 
 //GenerateStats generates stats up to this point
-func (m *Monitor) GenerateStats() {
+func (m *Monitor) GenerateStats(timestamp float32) {
 
 	logs := m.Logs
 	proStats := m.ProStats
@@ -92,7 +99,7 @@ func (m *Monitor) GenerateStats() {
 
 	fmt.Printf("\nSwap IN: %d \t Swap OUT: %d \n\n", swapIns, swapOuts)
 	prom := turnAroundSum / float64(len(proStats))
-	fmt.Printf("Turnaround Promedio: %f \n\n", (prom))
+	fmt.Printf("Turnaround Promedio: %f Timestamp: %f \n\n", (prom), timestamp)
 
 	fmt.Println("-------------------------------------------------------------------\n")
 	fmt.Println("END OF STATISTCS\n")

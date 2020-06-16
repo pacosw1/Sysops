@@ -1,7 +1,7 @@
 package requests
-package requests
 
 import (
+	"fmt"
 	"sysops/globals"
 )
 
@@ -15,15 +15,15 @@ type StatsReq struct {
 func NewStatsReq(input []string) *StatsReq {
 
 	return &StatsReq{
-		Type:  globals.End,
+		Type:  globals.Stats,
 		Input: input,
 	}
 }
 
 //GenerateOutput p
-func (f *StatsReq) GenerateOutput() {
+func (f *StatsReq) GenerateOutput(output string) {
 
-	
+	fmt.Println(output)
 
 }
 

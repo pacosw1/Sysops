@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"fmt"
+	"strconv"
 	"sysops/requests"
 	"sysops/types"
 )
@@ -11,18 +11,20 @@ func getRealAddr(realPage, pageSize, offset int) int {
 }
 
 //AccessMemory access or modify bits inside pages
-func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
+func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) string {
 
 	p := mm.ProcessList[PID]
 
+	output := ""
+
+	//Process doesn not exist
 	if p == nil {
-		fmt.Printf("Process does not exist in simulation")
-		return
+		return ("Process does not exist in simulation")
 	}
 
 	//validation bit overflow
 	if vAddr >= p.Size {
-		return
+		return "Invalid virtual address, out of range!"
 	}
 
 	//get offset and virtual page for bit
@@ -34,6 +36,8 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 
 	//if bit in real memory
 	if page.SwapFrame >= 0 { //esta en el swap
+		output += "Process in Swap Frame: " + strconv.Itoa(page.SwapFrame)
+
 		mm.SwapIn(page) //add it to physical memory
 
 		//page state after swap
@@ -52,12 +56,12 @@ func (mm *MemoryManager) AccessMemory(PID int, vAddr int, m int) {
 	//update LRU if active
 	mm.ReplacementQ.Push(page)
 
-	// physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
+	physicalAddress := getRealAddr(page.PageFrame, mm.PageSize, info.Offset)
 
-	//records end of command
+	output += "Physical Address for Virtual Adress " + strconv.Itoa(vAddr) + " is now located at " + strconv.Itoa(physicalAddress)
 
 	mm.TimeStep += 0.1 // access time
 
-	// fmt.Printf(" \nphysical Address: %d  PID: %d  ID: %d \n", physicalAddress, page.PID, page.ID)
+	return output
 
 }

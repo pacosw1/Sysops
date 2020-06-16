@@ -13,7 +13,7 @@ type FreeMem struct {
 	Logs  []*PageLog
 }
 
-//NewFreeMemReq n
+//NewFreeMemReq constructor
 func NewFreeMemReq(input []string, PID int) *FreeMem {
 
 	return &FreeMem{
@@ -24,55 +24,60 @@ func NewFreeMemReq(input []string, PID int) *FreeMem {
 	}
 }
 
-//GenerateOutput p
-func (f *FreeMem) GenerateOutput() {
+//GenerateOutput generates output based on logs and function
+func (f *FreeMem) GenerateOutput(output string) {
 
-	fmt.Println("\n-------------------------------------------------------------------\n")
+	fmt.Println("-------------------------------------------------------------------\n")
 	fmt.Println(f.Input, "Start\n")
 	fmt.Println("-------------------------------------------------------------------\n\n")
 
-	fmt.Println("\n")
-	fmt.Println(f.Input)
 	///ejecuta
+
+	fmt.Println(output)
 
 	logs := f.Logs
 
-	fmt.Println("Frames Freed: \n")
-	for i := 0; i < len(logs); i++ {
+	if len(logs) == 0 {
 
-		log := logs[i]
-		logType := log.Type
-		if logType == Freed {
+	} else {
 
-			if log.PageBefore.PageFrame != -1 {
-				fmt.Printf("PID: %d  VP: %d  Frame(Memory): %d \t\t", log.PageAfter.PID, log.PageBefore.ID, log.PageBefore.PageFrame)
+		fmt.Println("\nFrames Freed: \n")
+		for i := 0; i < len(logs); i++ {
 
-			} else {
-				fmt.Printf("PID: %d  VP: %d  Frame(Swap): %d \t\t", log.PageBefore.PID, log.PageBefore.ID, log.PageBefore.SwapFrame)
+			log := logs[i]
+			logType := log.Type
+			if logType == Freed {
+
+				if log.PageBefore.PageFrame != -1 {
+					fmt.Printf("PID: %d  VP: %d  Frame(Memory): %d \t\t", log.PageAfter.PID, log.PageBefore.ID, log.PageBefore.PageFrame)
+
+				} else {
+					fmt.Printf("PID: %d  VP: %d  Frame(Swap): %d \t\t", log.PageBefore.PID, log.PageBefore.ID, log.PageBefore.SwapFrame)
+
+				}
 
 			}
 
 		}
 
-	}
-	fmt.Println("\n")
+		fmt.Println("\n")
 
-	fmt.Println("-------------------------------------------------------------------\n\n")
+	}
 
 }
 
-//Args a
+//Args input arguments
 func (f *FreeMem) Args() []int {
 	args := []int{f.PID}
 	return args
 }
 
-//Type t
+//Type get request type
 func (f *FreeMem) GetType() string {
 	return f.Type
 }
 
-//GetLogs t
+//GetLogs get logs for this request
 func (f *FreeMem) GetLogs() []*PageLog {
 	return f.Logs
 }

@@ -2,7 +2,7 @@ package replacement
 
 import "sysops/types"
 
-//Algo re
+//Algo interface requirements to implement the replacement type used in simulation
 type Algo interface {
 	Print()
 	Push(p *types.Page)

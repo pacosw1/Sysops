@@ -7,9 +7,10 @@ import (
 )
 
 //FIFO first in first out struct
+//O(1) Search O(1) modifying O(N) Memory
 type FIFO struct {
-	OrderList *list.List
-	Location  map[string]*list.Element
+	OrderList *list.List               //store the page on a node of the list
+	Location  map[string]*list.Element //Stores the location and node of page on list
 }
 
 //NewFIFO creates and initializes a new fifo struct
@@ -49,7 +50,6 @@ func (f *FIFO) Push(page *types.Page) {
 	}
 
 	//else add it to structure
-
 	f.OrderList.PushFront(page)
 	f.Location[UID] = f.OrderList.Front()
 }
@@ -59,6 +59,7 @@ func (f *FIFO) Print() {
 
 	dummy := f.OrderList.Front()
 
+	//don't do anything if empty
 	if f.Empty() {
 		return
 	}
@@ -74,9 +75,11 @@ func (f *FIFO) Print() {
 //Remove removes a page from replacement queue
 func (f *FIFO) Remove(p *types.Page) {
 
+	//generate unique ID
 	UID := parseUID(p)
 	node := f.Location[UID]
 
+	//don't do anything if empty
 	if node == nil {
 		return
 	}
@@ -89,9 +92,11 @@ func (f *FIFO) Remove(p *types.Page) {
 //Pop returns and removes the next value in list back, LRUsed value
 func (f *FIFO) Pop() *types.Page {
 
+	//type assertion in go
 	last, _ := f.OrderList.Back().Value.(*types.Page)
-	f.OrderList.Remove(f.OrderList.Back())
 
+	//delete from both linked list and hash
+	f.OrderList.Remove(f.OrderList.Back())
 	delete(f.Location, parseUID(last))
 	return last
 

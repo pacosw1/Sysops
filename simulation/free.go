@@ -1,20 +1,18 @@
 package simulation
 
 import (
-	"fmt"
 	"sysops/requests"
 	"sysops/types"
 )
 
 //FreeProcess frees all pages from a specific process
-func (m *MemoryManager) FreeProcess(PID int) {
+func (m *MemoryManager) FreeProcess(PID int) string {
 
 	process := m.ProcessList[PID]
 
 	//if process does not exist
 	if process == nil {
-		fmt.Printf("Process %d does not exist \n", PID)
-		return
+		return "Process does not exist"
 	}
 
 	//if it does exist
@@ -27,6 +25,8 @@ func (m *MemoryManager) FreeProcess(PID int) {
 
 	//record command end
 	delete(m.ProcessList, PID)
+
+	return "Process Freed Successfully"
 
 }
 

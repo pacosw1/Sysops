@@ -13,7 +13,7 @@ type CommentReq struct {
 	Logs  []*PageLog
 }
 
-//NewCommentReq n
+//NewCommentReq constructor
 func NewCommentReq(input []string) *CommentReq {
 
 	return &CommentReq{
@@ -22,31 +22,28 @@ func NewCommentReq(input []string) *CommentReq {
 	}
 }
 
-//GenerateOutput p
-func (f *CommentReq) GenerateOutput() {
+//GenerateOutput generates response based on output and logs
+func (f *CommentReq) GenerateOutput(output string) {
 
 	fmt.Println("-------------------------------------------------------------------\n")
 	fmt.Println(f.Input, "START\n")
 	fmt.Println("-------------------------------------------------------------------\n\n")
 
-	fmt.Println(f.Input[0])
 	fmt.Println(f.Input[1:])
-
-	fmt.Println("-------------------------------------------------------------------\n\n")
 
 }
 
-//Args a
+//Args gets input arguments
 func (f *CommentReq) Args() []int {
 	return []int{}
 }
 
-//Type t
+//GetType gets the type for this command
 func (f *CommentReq) GetType() string {
 	return f.Type
 }
 
-//Type t
+//AddLog Adds log to this commands
 func (f *CommentReq) AddLog(p *PageLog) {
 
 }
